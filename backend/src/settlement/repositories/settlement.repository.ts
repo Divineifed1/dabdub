@@ -8,7 +8,7 @@ export class SettlementRepository {
   constructor(
     @InjectRepository(Settlement)
     private readonly repository: Repository<Settlement>,
-  ) {}
+  ) { }
 
   async create(settlementData: Partial<Settlement>): Promise<Settlement> {
     const settlement = this.repository.create(settlementData);
@@ -103,7 +103,11 @@ export class SettlementRepository {
     }
 
     await this.repository.update(id, updateData);
-    return this.findOne(id);
+    const updatedSettlement = await this.findOne(id);
+    if (!updatedSettlement) {
+      throw new Error(`Settlement with id ${id} not found`);
+    }
+    return updatedSettlement;
   }
 
   async incrementRetryCount(id: string): Promise<Settlement> {
@@ -120,7 +124,20 @@ export class SettlementRepository {
     updateData: Partial<Settlement>,
   ): Promise<Settlement> {
     await this.repository.update(id, updateData);
-    return this.findOne(id);
+    const settlement = await this.findOne(id);
+    if (!settlement) {
+      throw new Error(`Settlement with id ${id} not found`);
+    }
+    return settlement;
+  }
+
+  async updateBatch(
+    ids: string[],
+    updateData: Partial<Settlement>,
+  ): Promise<void> {
+    if (ids.length > 0) {
+      await this.repository.update(ids, updateData);
+    }
   }
 
   async delete(id: string): Promise<void> {
@@ -193,8 +210,8 @@ export class SettlementRepository {
 
     const amountQuery = merchantId
       ? this.repository
-          .createQueryBuilder('settlement')
-          .where('settlement.merchantId = :merchantId', { merchantId })
+        .createQueryBuilder('settlement')
+        .where('settlement.merchantId = :merchantId', { merchantId })
       : this.repository.createQueryBuilder('settlement');
 
     const totalAmountResult = await amountQuery
