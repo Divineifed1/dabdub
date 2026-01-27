@@ -1,84 +1,92 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNumber, IsEnum, IsOptional, Min, IsEmail } from 'class-validator';
-import { IsNotEmpty, IsNumber, IsString, IsUUID, ValidateNested } from 'class-validator';
+import { IsString, IsNumber, IsEnum, IsOptional, Min, IsEmail, IsNotEmpty, IsUUID, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export enum SettlementStatus {
-  PENDING = 'PENDING',
-  PROCESSING = 'PROCESSING',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED',
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+}
+
+export class BankDetailsDto {
+  @ApiProperty({ example: '1234567890' })
+  @IsString()
+  @IsNotEmpty()
+  accountNumber!: string;
+
+  @ApiProperty({ example: '123456789' })
+  @IsString()
+  @IsNotEmpty()
+  routingNumber!: string;
+
+  @ApiProperty({ example: 'John Doe' })
+  @IsString()
+  @IsNotEmpty()
+  name!: string;
+
+  @ApiProperty({ example: 'Chase Bank' })
+  @IsString()
+  @IsNotEmpty()
+  bankName!: string;
 }
 
 export class CreateSettlementDto {
-  @ApiProperty({
-    description: 'Settlement identifier',
-    example: 'SETTLE-2024-001',
-    minLength: 5,
-    maxLength: 50,
-  })
-  @IsString()
-  id: string;
+  @ApiProperty({ description: 'Payment request identifier' })
+  @IsUUID()
+  @IsNotEmpty()
+  paymentRequestId!: string;
 
-  @ApiProperty({
-    description: 'Settlement amount in the base currency',
-    example: 1000.50,
-    minimum: 0.01,
-    type: 'number',
-  })
+  @ApiProperty({ description: 'Merchant identifier' })
+  @IsUUID()
+  @IsNotEmpty()
+  merchantId!: string;
+
+  @ApiProperty({ description: 'Settlement amount', example: 1000.50 })
   @IsNumber()
   @Min(0.01)
-  amount: number;
+  @IsNotEmpty()
+  amount!: number;
 
-  @ApiProperty({
-    description: 'Three-letter currency code',
-    example: 'USD',
-    enum: ['USD', 'EUR', 'GBP', 'NGN'],
-  })
-  @IsEnum(['USD', 'EUR', 'GBP', 'NGN'])
-  currency: string;
+  @ApiProperty({ description: 'Currency code', example: 'USD' })
+  @IsString()
+  @IsNotEmpty()
+  currency!: string;
 
-  @ApiPropertyOptional({
-    description: 'Settlement status',
-    example: SettlementStatus.PENDING,
-    enum: Object.values(SettlementStatus),
-  })
+  @ApiProperty({ description: 'Source currency code', example: 'USD' })
+  @IsString()
+  @IsNotEmpty()
+  sourceCurrency!: string;
+
+  @ApiProperty({ type: BankDetailsDto })
+  @ValidateNested()
+  @Type(() => BankDetailsDto)
+  @IsNotEmpty()
+  bankDetails!: BankDetailsDto;
+
+  @ApiPropertyOptional({ enum: SettlementStatus, default: SettlementStatus.PENDING })
   @IsOptional()
   @IsEnum(SettlementStatus)
   status?: SettlementStatus;
 
-  @ApiPropertyOptional({
-    description: 'Recipient email address',
-    example: 'recipient@example.com',
-  })
+  @ApiPropertyOptional({ description: 'Recipient email address' })
   @IsOptional()
   @IsEmail()
   recipientEmail?: string;
 
-  @ApiPropertyOptional({
-    description: 'Settlement description or memo',
-    example: 'Payment for services rendered',
-    maxLength: 500,
-  })
+  @ApiPropertyOptional({ description: 'Description or memo' })
   @IsOptional()
   @IsString()
   description?: string;
 }
 
 export class UpdateSettlementDto {
-  @ApiPropertyOptional({
-    description: 'Updated settlement status',
-    enum: Object.values(SettlementStatus),
-  })
+  @ApiPropertyOptional({ enum: SettlementStatus })
   @IsOptional()
   @IsEnum(SettlementStatus)
   status?: SettlementStatus;
 
-  @ApiPropertyOptional({
-    description: 'Updated settlement amount',
-    example: 1200.00,
-    minimum: 0.01,
-  })
+  @ApiPropertyOptional({ example: 1200.00 })
   @IsOptional()
   @IsNumber()
   @Min(0.01)
@@ -86,91 +94,30 @@ export class UpdateSettlementDto {
 }
 
 export class SettlementResponseDto {
-  @ApiProperty({
-    description: 'Settlement unique identifier',
-    example: 'SETTLE-2024-001',
-  })
-  id: string;
+  @ApiProperty()
+  id!: string;
 
-  @ApiProperty({
-    description: 'Settlement amount',
-    example: 1000.50,
-  })
-  amount: number;
+  @ApiProperty()
+  paymentRequestId!: string;
 
-  @ApiProperty({
-    description: 'Currency code',
-    example: 'USD',
-  })
-  currency: string;
+  @ApiProperty()
+  merchantId!: string;
 
-  @ApiProperty({
-    description: 'Current status of settlement',
-    example: SettlementStatus.COMPLETED,
-    enum: Object.values(SettlementStatus),
-  })
-  status: SettlementStatus;
+  @ApiProperty()
+  amount!: number;
 
-  @ApiProperty({
-    description: 'Settlement creation timestamp',
-    example: '2024-01-20T10:30:00Z',
-  })
-  createdAt: Date;
+  @ApiProperty()
+  currency!: string;
 
-  @ApiProperty({
-    description: 'Settlement last update timestamp',
-    example: '2024-01-20T11:30:00Z',
-  })
-  updatedAt: Date;
+  @ApiProperty({ enum: SettlementStatus })
+  status!: SettlementStatus;
 
-  @ApiPropertyOptional({
-    description: 'Settlement completion timestamp',
-    example: '2024-01-20T12:00:00Z',
-  })
-  completedAt?: Date;
+  @ApiProperty()
+  createdAt!: Date;
 
+  @ApiProperty()
+  updatedAt!: Date;
 
-export class BankDetailsDto {
-    @IsString()
-    @IsNotEmpty()
-    accountNumber!: string;
-
-    @IsString()
-    @IsNotEmpty()
-    routingNumber!: string;
-
-    @IsString()
-    @IsNotEmpty()
-    name!: string;
-
-    @IsString()
-    @IsNotEmpty()
-    bankName!: string;
-}
-
-export class CreateSettlementDto {
-    @IsUUID()
-    @IsNotEmpty()
-    paymentRequestId!: string;
-
-    @IsUUID()
-    @IsNotEmpty()
-    merchantId!: string;
-
-    @IsNumber()
-    @IsNotEmpty()
-    amount!: number;
-
-    @IsString()
-    @IsNotEmpty()
-    currency!: string;
-
-    @IsString()
-    @IsNotEmpty()
-    sourceCurrency!: string;
-
-    @ValidateNested()
-    @Type(() => BankDetailsDto)
-    @IsNotEmpty()
-    bankDetails!: BankDetailsDto;
+  @ApiPropertyOptional()
+  settledAt?: Date;
 }

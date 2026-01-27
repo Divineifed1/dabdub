@@ -3,7 +3,7 @@ import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as redisStore from 'cache-manager-redis-store';
 import Redis, { Cluster } from 'ioredis';
-import cacheConfig from './cache.config';
+import cacheConfig, { CacheConfig } from './cache.config';
 import { CacheService } from './cache.service';
 import { CacheMetricsService } from './cache-metrics.service';
 import { CacheWarmingService } from './cache-warming.service';
@@ -20,8 +20,7 @@ export class CacheModule {
         NestCacheModule.registerAsync({
           imports: [ConfigModule],
           useFactory: async (configService: ConfigService) => {
-            const config =
-              configService.get<ReturnType<typeof cacheConfig>>('cache');
+            const config = configService.get<CacheConfig>('cache');
 
             if (!config) {
               throw new Error('Cache configuration not found');
@@ -39,7 +38,7 @@ export class CacheModule {
               });
 
               return {
-                store: redisStore,
+                store: redisStore as any,
                 host: config.cluster.nodes[0]?.host || 'localhost',
                 port: config.cluster.nodes[0]?.port || 6379,
                 ttl: config.defaultTtl * 1000, // Convert to milliseconds
@@ -80,7 +79,7 @@ export class CacheModule {
             });
 
             return {
-              store: redisStore,
+              store: redisStore as any,
               host: config.host,
               port: config.port,
               password: config.password,

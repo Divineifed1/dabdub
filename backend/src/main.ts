@@ -29,6 +29,17 @@ async function bootstrap() {
   // Use helmet for security headers
   app.use(helmet());
 
+  // Swagger Documentation
+  const { DocumentBuilder, SwaggerModule } = await import('@nestjs/swagger');
+  const config = new DocumentBuilder()
+    .setTitle('Dabdub Webhooks API')
+    .setDescription('The Dabdub Webhooks Management API')
+    .setVersion('1.0')
+    .addTag('Webhooks')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
