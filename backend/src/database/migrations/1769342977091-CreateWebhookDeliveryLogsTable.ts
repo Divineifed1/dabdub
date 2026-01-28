@@ -87,6 +87,17 @@ export class CreateWebhookDeliveryLogsTable1769342977091 implements MigrationInt
             isNullable: true,
           },
           {
+            name: 'payload_snapshot_encoding',
+            type: 'varchar',
+            length: '50',
+            isNullable: true,
+          },
+          {
+            name: 'payload_snapshot_size',
+            type: 'int',
+            isNullable: true,
+          },
+          {
             name: 'sent_at',
             type: 'timestamp',
             isNullable: true,
@@ -112,8 +123,31 @@ export class CreateWebhookDeliveryLogsTable1769342977091 implements MigrationInt
             default: 30,
           },
           {
+            name: 'retention_until',
+            type: 'timestamp',
+            isNullable: true,
+          },
+          {
             name: 'debug_info',
             type: 'jsonb',
+            isNullable: true,
+          },
+          {
+            name: 'request_id',
+            type: 'varchar',
+            length: '128',
+            isNullable: true,
+          },
+          {
+            name: 'correlation_id',
+            type: 'varchar',
+            length: '128',
+            isNullable: true,
+          },
+          {
+            name: 'trace_id',
+            type: 'varchar',
+            length: '128',
             isNullable: true,
           },
           {

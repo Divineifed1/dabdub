@@ -7,7 +7,9 @@ import {
   Index,
   ManyToOne,
   JoinColumn,
+  BeforeInsert,
 } from 'typeorm';
+import { WebhookConfigurationEntity } from './webhook-configuration.entity';
 
 export enum WebhookDeliveryStatus {
   PENDING = 'pending',
@@ -22,7 +24,7 @@ export enum WebhookDeliveryStatus {
 @Index(['createdAt'])
 @Index(['webhookConfigId', 'status'])
 @Index(['webhookConfigId', 'createdAt'])
-export class WebhookDeliveryLog {
+export class WebhookDeliveryLogEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
@@ -79,6 +81,12 @@ export class WebhookDeliveryLog {
   @Column({ name: 'payload_snapshot', type: 'bytea', nullable: true })
   payloadSnapshot?: Buffer;
 
+  @Column({ name: 'payload_snapshot_encoding', type: 'varchar', length: 50, nullable: true })
+  payloadSnapshotEncoding?: string;
+
+  @Column({ name: 'payload_snapshot_size', type: 'int', nullable: true })
+  payloadSnapshotSize?: number;
+
   @Column({ name: 'sent_at', type: 'timestamp', nullable: true })
   sentAt?: Date;
 
@@ -94,8 +102,20 @@ export class WebhookDeliveryLog {
   @Column({ name: 'retention_days', type: 'int', default: 30 })
   retentionDays!: number;
 
+  @Column({ name: 'retention_until', type: 'timestamp', nullable: true })
+  retentionUntil?: Date;
+
   @Column({ name: 'debug_info', type: 'jsonb', nullable: true })
   debugInfo?: any;
+
+  @Column({ name: 'request_id', type: 'varchar', length: 128, nullable: true })
+  requestId?: string;
+
+  @Column({ name: 'correlation_id', type: 'varchar', length: 128, nullable: true })
+  correlationId?: string;
+
+  @Column({ name: 'trace_id', type: 'varchar', length: 128, nullable: true })
+  traceId?: string;
 
   @Column({ name: 'user_agent', type: 'varchar', length: 255, nullable: true })
   userAgent?: string;
@@ -118,7 +138,15 @@ export class WebhookDeliveryLog {
   })
   updatedAt!: Date;
 
-  @ManyToOne('WebhookConfiguration', { onDelete: 'CASCADE' })
+  @ManyToOne(() => WebhookConfigurationEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'webhook_config_id' })
-  webhookConfiguration!: any;
+  webhookConfiguration!: WebhookConfigurationEntity;
+
+  @BeforeInsert()
+  setRetentionUntil(): void {
+    if (!this.retentionUntil) {
+      const days = this.retentionDays ?? 30;
+      this.retentionUntil = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+    }
+  }
 }
