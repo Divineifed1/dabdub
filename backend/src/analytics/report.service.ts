@@ -116,7 +116,7 @@ export class ReportService {
       job.completedAt = new Date();
     } catch (error: any) {
       job.status = 'failed';
-      job.error = error.message;
+      job.error = error instanceof Error ? error.message : String(error);
       throw error;
     }
   }

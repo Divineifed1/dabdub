@@ -80,3 +80,24 @@ export class SuccessResponseDto<T> {
   })
   requestId: string;
 }
+
+export class CommonResponseDto<T> {
+  @ApiProperty({
+    description: 'Indicates whether the request was successful',
+    example: true,
+  })
+  success: boolean;
+
+  @ApiProperty({
+    description: 'Response payload',
+    required: false,
+  })
+  data?: T | null;
+
+  @ApiProperty({
+    description: 'Optional human-readable message',
+    required: false,
+    example: 'Operation completed successfully',
+  })
+  message?: string;
+}
