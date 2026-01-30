@@ -9,6 +9,7 @@ import {
 import { Exclude } from 'class-transformer';
 import { Settlement } from '../../settlement/entities/settlement.entity';
 import { PaymentRequest } from './payment-request.entity';
+import { KycVerification } from '../../kyc/entities/kyc-verification.entity';
 
 export enum MerchantStatus {
   ACTIVE = 'active',
@@ -83,4 +84,7 @@ export class Merchant {
 
   @OneToMany(() => PaymentRequest, (paymentRequest) => paymentRequest.merchant)
   paymentRequests!: PaymentRequest[];
+
+  @OneToMany(() => KycVerification, (kycVerification) => kycVerification.merchant)
+  kycVerifications!: KycVerification[];
 }
