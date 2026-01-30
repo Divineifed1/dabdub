@@ -1,4 +1,3 @@
-
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -9,7 +8,7 @@ type Redis = any;
 @Injectable()
 export class ApiKeyUsageService {
   constructor(
-     @InjectRepository(ApiKeyUsage) private usageRepo: Repository<ApiKeyUsage>,
-     // private readonly redis: Redis
+    @InjectRepository(ApiKeyUsage) private usageRepo: Repository<ApiKeyUsage>,
+    // private readonly redis: Redis
   ) {}
 }

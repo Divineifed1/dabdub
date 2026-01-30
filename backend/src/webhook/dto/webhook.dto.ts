@@ -1,5 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsUrl, IsArray, IsEnum, IsString, IsOptional, IsBoolean, IsInt, Min } from 'class-validator';
+import {
+  IsUrl,
+  IsArray,
+  IsEnum,
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsInt,
+  Min,
+} from 'class-validator';
 import { WebhookEvent } from '../../database/entities/webhook-configuration.entity';
 
 export class CreateWebhookDto {
@@ -13,7 +22,10 @@ export class CreateWebhookDto {
 
   @ApiProperty({
     description: 'List of events to subscribe to',
-    example: [WebhookEvent.PAYMENT_REQUEST_CREATED, WebhookEvent.SETTLEMENT_COMPLETED],
+    example: [
+      WebhookEvent.PAYMENT_REQUEST_CREATED,
+      WebhookEvent.SETTLEMENT_COMPLETED,
+    ],
     isArray: true,
     enum: Object.values(WebhookEvent),
   })

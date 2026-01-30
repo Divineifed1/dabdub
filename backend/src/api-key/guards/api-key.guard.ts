@@ -1,4 +1,10 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { ApiKeyService } from '../api-key.service';
 import { Reflector } from '@nestjs/core';
 
@@ -6,7 +12,7 @@ import { Reflector } from '@nestjs/core';
 export class ApiKeyGuard implements CanActivate {
   constructor(
     private apiKeyService: ApiKeyService,
-    private reflector: Reflector
+    private reflector: Reflector,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -20,13 +26,22 @@ export class ApiKeyGuard implements CanActivate {
 
     // 1. IP Whitelist Check
     const clientIp = request.ip;
-    if (keyEntity.ipWhitelist.length > 0 && !keyEntity.ipWhitelist.includes(clientIp)) {
+    if (
+      keyEntity.ipWhitelist.length > 0 &&
+      !keyEntity.ipWhitelist.includes(clientIp)
+    ) {
       throw new ForbiddenException(`IP ${clientIp} not whitelisted`);
     }
 
     // 2. Scope Check (via Decorator)
-    const requiredScopes = this.reflector.get<string[]>('scopes', context.getHandler());
-    if (requiredScopes && !requiredScopes.every(s => keyEntity.scopes.includes(s))) {
+    const requiredScopes = this.reflector.get<string[]>(
+      'scopes',
+      context.getHandler(),
+    );
+    if (
+      requiredScopes &&
+      !requiredScopes.every((s) => keyEntity.scopes.includes(s))
+    ) {
       throw new ForbiddenException('Insufficient API key permissions');
     }
 

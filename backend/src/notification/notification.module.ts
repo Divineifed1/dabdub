@@ -10,19 +10,19 @@ import { SmsProvider } from './providers/sms.provider';
 import { PushProvider } from './providers/push.provider';
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([Notification, NotificationPreference]),
-        BullModule.registerQueue({
-            name: 'notifications',
-        }),
-    ],
-    providers: [
-        NotificationService,
-        NotificationProcessor,
-        EmailProvider,
-        SmsProvider,
-        PushProvider,
-    ],
-    exports: [NotificationService],
+  imports: [
+    TypeOrmModule.forFeature([Notification, NotificationPreference]),
+    BullModule.registerQueue({
+      name: 'notifications',
+    }),
+  ],
+  providers: [
+    NotificationService,
+    NotificationProcessor,
+    EmailProvider,
+    SmsProvider,
+    PushProvider,
+  ],
+  exports: [NotificationService],
 })
-export class NotificationModule { }
+export class NotificationModule {}

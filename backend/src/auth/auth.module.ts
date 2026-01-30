@@ -25,7 +25,8 @@ import { ApiKeyService } from './services/api-key.service';
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRATION') || '1h' as any,
+          expiresIn:
+            configService.get<string>('JWT_EXPIRATION') || ('1h' as any),
           algorithm: 'HS256',
         },
       }),
@@ -42,6 +43,6 @@ import { ApiKeyService } from './services/api-key.service';
     SessionService,
     ApiKeyService,
   ],
-  exports: [AuthService, JwtModule, PassportModule],
+  exports: [AuthService, JwtModule, PassportModule, PasswordService],
 })
 export class AuthModule {}

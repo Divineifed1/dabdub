@@ -9,7 +9,10 @@ import {
 } from '../database/entities/payment-request.entity';
 import { CreatePaymentRequestDto } from './dto/create-payment-request.dto';
 import { UpdatePaymentRequestDto } from './dto/update-payment-request.dto';
-import { SearchPaymentRequestDto, StatsRangeDto } from './dto/search-payment-request.dto';
+import {
+  SearchPaymentRequestDto,
+  StatsRangeDto,
+} from './dto/search-payment-request.dto';
 import {
   PaymentRequestNotFoundException,
   PaymentRequestInvalidStatusException,
@@ -19,23 +22,24 @@ import {
 } from './exceptions/payment-request.exceptions';
 
 /** Allowed status transitions */
-const STATUS_TRANSITIONS: Record<PaymentRequestStatus, PaymentRequestStatus[]> = {
-  [PaymentRequestStatus.PENDING]: [
-    PaymentRequestStatus.PROCESSING,
-    PaymentRequestStatus.CANCELLED,
-    PaymentRequestStatus.EXPIRED,
-  ],
-  [PaymentRequestStatus.PROCESSING]: [
-    PaymentRequestStatus.COMPLETED,
-    PaymentRequestStatus.FAILED,
-    PaymentRequestStatus.CANCELLED,
-  ],
-  [PaymentRequestStatus.COMPLETED]: [PaymentRequestStatus.REFUNDED],
-  [PaymentRequestStatus.FAILED]: [],
-  [PaymentRequestStatus.CANCELLED]: [],
-  [PaymentRequestStatus.EXPIRED]: [],
-  [PaymentRequestStatus.REFUNDED]: [],
-};
+const STATUS_TRANSITIONS: Record<PaymentRequestStatus, PaymentRequestStatus[]> =
+  {
+    [PaymentRequestStatus.PENDING]: [
+      PaymentRequestStatus.PROCESSING,
+      PaymentRequestStatus.CANCELLED,
+      PaymentRequestStatus.EXPIRED,
+    ],
+    [PaymentRequestStatus.PROCESSING]: [
+      PaymentRequestStatus.COMPLETED,
+      PaymentRequestStatus.FAILED,
+      PaymentRequestStatus.CANCELLED,
+    ],
+    [PaymentRequestStatus.COMPLETED]: [PaymentRequestStatus.REFUNDED],
+    [PaymentRequestStatus.FAILED]: [],
+    [PaymentRequestStatus.CANCELLED]: [],
+    [PaymentRequestStatus.EXPIRED]: [],
+    [PaymentRequestStatus.REFUNDED]: [],
+  };
 
 @Injectable()
 export class PaymentRequestService {
@@ -128,10 +132,7 @@ export class PaymentRequestService {
     const request = await this.findById(id);
 
     if (request.status !== PaymentRequestStatus.PENDING) {
-      throw new PaymentRequestInvalidStatusException(
-        request.status,
-        'update',
-      );
+      throw new PaymentRequestInvalidStatusException(request.status, 'update');
     }
 
     const stellarConfig = this.configService.getStellarConfig();
@@ -265,9 +266,12 @@ export class PaymentRequestService {
     };
   }
 
-  async search(
-    dto: SearchPaymentRequestDto,
-  ): Promise<{ data: PaymentRequest[]; total: number; page: number; limit: number }> {
+  async search(dto: SearchPaymentRequestDto): Promise<{
+    data: PaymentRequest[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
     const page = parseInt(dto.page || '1', 10);
     const limit = parseInt(dto.limit || '20', 10);
 

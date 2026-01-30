@@ -48,7 +48,7 @@
     "@willsoto/nestjs-prometheus": "^6.0.2",
     "bcrypt": "^6.0.0",
     "bull": "^4.16.5",
-    "cache-manager": "^5.7.6",
+    "cache-manager": "^7.2.8",
     "cache-manager-redis-store": "^2.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
@@ -129,6 +129,11 @@
       "src/**/*.(t|j)s"
     ],
     "coverageDirectory": "coverage",
+    "coverageReporters": [
+      "text",
+      "json-summary",
+      "lcov"
+    ],
     "testEnvironment": "node"
   }
 }

@@ -1,6 +1,21 @@
-import { Controller, Get, Post, Param, Body, Res, Logger, UseGuards, Header } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  Res,
+  Logger,
+  UseGuards,
+  Header,
+} from '@nestjs/common';
 import { Response } from 'express';
-import { ApiTags, ApiOperation, ApiResponse, ApiProduces } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiProduces,
+} from '@nestjs/swagger';
 import { PaymentService } from '../payment/payment.service';
 import { ThrottlerGuard } from '@nestjs/throttler';
 
@@ -14,7 +29,10 @@ export class PublicController {
 
   @Get('payment/:id')
   @ApiOperation({ summary: 'Get public payment details' })
-  @ApiResponse({ status: 200, description: 'Payment details retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Payment details retrieved successfully',
+  })
   @ApiResponse({ status: 404, description: 'Payment not found' })
   @Header('Cache-Control', 'public, max-age=300')
   async getPayment(@Param('id') id: string) {
@@ -47,7 +65,10 @@ export class PublicController {
 
   @Post('payment/:id/notify')
   @ApiOperation({ summary: 'Handle customer notification callbacks' })
-  @ApiResponse({ status: 200, description: 'Notification handled successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Notification handled successfully',
+  })
   @ApiResponse({ status: 404, description: 'Payment not found' })
   async notify(@Param('id') id: string, @Body() data: any) {
     this.logger.log(`Handling notify for payment id: ${id}`);
@@ -66,7 +87,10 @@ export class PublicController {
 
   @Get('exchange-rates')
   @ApiOperation({ summary: 'Get current exchange rates' })
-  @ApiResponse({ status: 200, description: 'Exchange rates retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Exchange rates retrieved successfully',
+  })
   @Header('Cache-Control', 'public, max-age=60')
   getExchangeRates() {
     this.logger.log('Fetching exchange rates');

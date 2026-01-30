@@ -60,26 +60,23 @@ export class PaymentRequestController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update a pending payment request' })
   @ApiResponse({ status: 200, description: 'Payment request updated.' })
-  async update(
-    @Param('id') id: string,
-    @Body() dto: UpdatePaymentRequestDto,
-  ) {
+  async update(@Param('id') id: string, @Body() dto: UpdatePaymentRequestDto) {
     return this.paymentRequestService.update(id, dto);
   }
 
   @Post(':id/cancel')
   @ApiOperation({ summary: 'Cancel a payment request' })
   @ApiResponse({ status: 200, description: 'Payment request cancelled.' })
-  async cancel(
-    @Param('id') id: string,
-    @Body('reason') reason?: string,
-  ) {
+  async cancel(@Param('id') id: string, @Body('reason') reason?: string) {
     return this.paymentRequestService.cancel(id, reason);
   }
 
   @Post(':id/process')
   @ApiOperation({ summary: 'Trigger on-chain processing' })
-  @ApiResponse({ status: 200, description: 'Payment request processing started.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Payment request processing started.',
+  })
   async process(@Param('id') id: string) {
     return this.paymentRequestService.process(id);
   }
@@ -87,10 +84,7 @@ export class PaymentRequestController {
   @Post(':id/refund')
   @ApiOperation({ summary: 'Refund a completed payment request' })
   @ApiResponse({ status: 200, description: 'Payment request refunded.' })
-  async refund(
-    @Param('id') id: string,
-    @Body('reason') reason?: string,
-  ) {
+  async refund(@Param('id') id: string, @Body('reason') reason?: string) {
     return this.paymentRequestService.refund(id, reason);
   }
 

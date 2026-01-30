@@ -8,7 +8,7 @@ export class SettlementRepository {
   constructor(
     @InjectRepository(Settlement)
     private readonly repository: Repository<Settlement>,
-  ) { }
+  ) {}
 
   async create(settlementData: Partial<Settlement>): Promise<Settlement> {
     const settlement = this.repository.create(settlementData);
@@ -210,8 +210,8 @@ export class SettlementRepository {
 
     const amountQuery = merchantId
       ? this.repository
-        .createQueryBuilder('settlement')
-        .where('settlement.merchantId = :merchantId', { merchantId })
+          .createQueryBuilder('settlement')
+          .where('settlement.merchantId = :merchantId', { merchantId })
       : this.repository.createQueryBuilder('settlement');
 
     const totalAmountResult = await amountQuery

@@ -1,5 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNumber, IsEnum, IsOptional, Min, IsEmail, IsNotEmpty, IsUUID, ValidateNested } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsEnum,
+  IsOptional,
+  Min,
+  IsEmail,
+  IsNotEmpty,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export enum SettlementStatus {
@@ -42,7 +52,7 @@ export class CreateSettlementDto {
   @IsNotEmpty()
   merchantId!: string;
 
-  @ApiProperty({ description: 'Settlement amount', example: 1000.50 })
+  @ApiProperty({ description: 'Settlement amount', example: 1000.5 })
   @IsNumber()
   @Min(0.01)
   @IsNotEmpty()
@@ -64,7 +74,10 @@ export class CreateSettlementDto {
   @IsNotEmpty()
   bankDetails!: BankDetailsDto;
 
-  @ApiPropertyOptional({ enum: SettlementStatus, default: SettlementStatus.PENDING })
+  @ApiPropertyOptional({
+    enum: SettlementStatus,
+    default: SettlementStatus.PENDING,
+  })
   @IsOptional()
   @IsEnum(SettlementStatus)
   status?: SettlementStatus;
@@ -86,7 +99,7 @@ export class UpdateSettlementDto {
   @IsEnum(SettlementStatus)
   status?: SettlementStatus;
 
-  @ApiPropertyOptional({ example: 1200.00 })
+  @ApiPropertyOptional({ example: 1200.0 })
   @IsOptional()
   @IsNumber()
   @Min(0.01)

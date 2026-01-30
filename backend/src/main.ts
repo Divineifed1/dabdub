@@ -33,7 +33,9 @@ async function bootstrap() {
   // Swagger Setup
   const config = new DocumentBuilder()
     .setTitle('Dabdub API')
-    .setDescription('The Dabdub API documentation (Transactions, Webhooks, Health)')
+    .setDescription(
+      'The Dabdub API documentation (Transactions, Webhooks, Health)',
+    )
     .setVersion('1.0')
     .addTag('Webhooks')
     .addBearerAuth()

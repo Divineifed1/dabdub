@@ -6,7 +6,9 @@ import { WebhookDeliveryLogEntity } from '../../database/entities/webhook-delive
 
 @Injectable()
 export class WebhookDeliveryLogMaintenanceService {
-  private readonly logger = new Logger(WebhookDeliveryLogMaintenanceService.name);
+  private readonly logger = new Logger(
+    WebhookDeliveryLogMaintenanceService.name,
+  );
 
   constructor(
     @InjectRepository(WebhookDeliveryLogEntity)
@@ -16,7 +18,7 @@ export class WebhookDeliveryLogMaintenanceService {
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async cleanupExpiredLogs(): Promise<void> {
     try {
-      const result = await this.deliveryLogRepository.query(`
+      const result = (await this.deliveryLogRepository.query(`
         DELETE FROM webhook_delivery_logs
         WHERE (
           retention_until IS NOT NULL AND retention_until < NOW()
@@ -25,15 +27,22 @@ export class WebhookDeliveryLogMaintenanceService {
           retention_until IS NULL
           AND created_at < (NOW() - (retention_days || ' days')::interval)
         )
-      `) as { rowCount?: number } | unknown[];
+      `)) as { rowCount?: number } | unknown[];
 
-      const deletedCount = Array.isArray(result) ? result.length : (result?.rowCount ?? 0);
+      const deletedCount = Array.isArray(result)
+        ? result.length
+        : (result?.rowCount ?? 0);
       if (deletedCount > 0) {
-        this.logger.log(`Deleted ${deletedCount} expired webhook delivery logs.`);
+        this.logger.log(
+          `Deleted ${deletedCount} expired webhook delivery logs.`,
+        );
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      this.logger.error('Failed to cleanup expired webhook delivery logs.', err);
+      this.logger.error(
+        'Failed to cleanup expired webhook delivery logs.',
+        err,
+      );
     }
   }
 }

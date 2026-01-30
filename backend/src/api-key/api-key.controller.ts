@@ -1,15 +1,31 @@
-import { 
-  Controller, Get, Post, Put, Delete, Body, Param, 
-  UseGuards, ParseArrayPipe, HttpStatus, HttpCode 
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  ParseArrayPipe,
+  HttpStatus,
+  HttpCode,
 } from '@nestjs/common';
-import { 
-  ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiBearerAuth 
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiHeader,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { ApiKeyService } from './api-key.service';
 import { ApiKeyUsageService } from './api-key-usage.service';
 import { CreateApiKeyDto, UpdateScopesDto, WhitelistDto } from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'; // Assuming JWT for merchant session
-import { ApiKeyResponseDto, CreatedKeySecretDto } from './dto/api-key-response.dto';
+import {
+  ApiKeyResponseDto,
+  CreatedKeySecretDto,
+} from './dto/api-key-response.dto';
 
 @ApiTags('API Key Management')
 @ApiBearerAuth()
@@ -23,7 +39,11 @@ export class ApiKeyController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new API key' })
-  @ApiResponse({ status: 201, type: CreatedKeySecretDto, description: 'Key created. WARNING: Secret only shown once.' })
+  @ApiResponse({
+    status: 201,
+    type: CreatedKeySecretDto,
+    description: 'Key created. WARNING: Secret only shown once.',
+  })
   async create(@Body() dto: CreateApiKeyDto) {
     return this.apiKeyService.create(dto);
   }
@@ -52,7 +72,11 @@ export class ApiKeyController {
   @Post(':id/rotate')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Rotate API key' })
-  @ApiResponse({ status: 200, type: CreatedKeySecretDto, description: 'Old key invalidated, new key returned.' })
+  @ApiResponse({
+    status: 200,
+    type: CreatedKeySecretDto,
+    description: 'Old key invalidated, new key returned.',
+  })
   async rotate(@Param('id') id: string) {
     return this.apiKeyService.rotate(id);
   }

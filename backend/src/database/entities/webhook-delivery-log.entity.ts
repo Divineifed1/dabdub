@@ -81,7 +81,12 @@ export class WebhookDeliveryLogEntity {
   @Column({ name: 'payload_snapshot', type: 'bytea', nullable: true })
   payloadSnapshot?: Buffer;
 
-  @Column({ name: 'payload_snapshot_encoding', type: 'varchar', length: 50, nullable: true })
+  @Column({
+    name: 'payload_snapshot_encoding',
+    type: 'varchar',
+    length: 50,
+    nullable: true,
+  })
   payloadSnapshotEncoding?: string;
 
   @Column({ name: 'payload_snapshot_size', type: 'int', nullable: true })
@@ -111,7 +116,12 @@ export class WebhookDeliveryLogEntity {
   @Column({ name: 'request_id', type: 'varchar', length: 128, nullable: true })
   requestId?: string;
 
-  @Column({ name: 'correlation_id', type: 'varchar', length: 128, nullable: true })
+  @Column({
+    name: 'correlation_id',
+    type: 'varchar',
+    length: 128,
+    nullable: true,
+  })
   correlationId?: string;
 
   @Column({ name: 'trace_id', type: 'varchar', length: 128, nullable: true })

@@ -1,11 +1,22 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WebhookConfigurationEntity } from '../../database/entities/webhook-configuration.entity';
 import { CreateWebhookDto } from '../dto/webhook.dto';
 import { randomUUID } from 'crypto';
-import { WebhookDeliveryService, WebhookDeliveryContext } from './webhook-delivery.service';
-import { WebhookDeliveryLogEntity, WebhookDeliveryStatus } from '../../database/entities/webhook-delivery-log.entity';
+import {
+  WebhookDeliveryService,
+  WebhookDeliveryContext,
+} from './webhook-delivery.service';
+import {
+  WebhookDeliveryLogEntity,
+  WebhookDeliveryStatus,
+} from '../../database/entities/webhook-delivery-log.entity';
 
 @Injectable()
 export class WebhookService {
@@ -24,12 +35,17 @@ export class WebhookService {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
     try {
-      const response = await fetch(createWebhookDto.url, { method: 'HEAD', signal: controller.signal });
+      const response = await fetch(createWebhookDto.url, {
+        method: 'HEAD',
+        signal: controller.signal,
+      });
       if (!response.ok && response.status !== 404) {
         throw new BadRequestException('Webhook URL is not reachable');
       }
     } catch (error) {
-      throw new BadRequestException('Webhook URL validation failed: ' + (error as Error).message);
+      throw new BadRequestException(
+        'Webhook URL validation failed: ' + (error as Error).message,
+      );
     } finally {
       clearTimeout(timeout);
     }
@@ -69,7 +85,10 @@ export class WebhookService {
     return webhook;
   }
 
-  async update(id: string, updateWebhookDto: CreateWebhookDto): Promise<WebhookConfigurationEntity> {
+  async update(
+    id: string,
+    updateWebhookDto: CreateWebhookDto,
+  ): Promise<WebhookConfigurationEntity> {
     const webhook = await this.findOne(id);
 
     if (updateWebhookDto.url) {
@@ -120,7 +139,10 @@ export class WebhookService {
   }
 
   async resetFailureCount(id: string): Promise<void> {
-    await this.webhookRepository.update({ id }, { failureCount: 0, lastDeliveredAt: new Date() });
+    await this.webhookRepository.update(
+      { id },
+      { failureCount: 0, lastDeliveredAt: new Date() },
+    );
   }
 
   async publishEvent(
@@ -128,23 +150,47 @@ export class WebhookService {
     payload: unknown,
     context: WebhookDeliveryContext = {},
   ): Promise<void> {
-    const activeWebhooks = await this.webhookRepository.find({ where: { isActive: true } });
-    const targets = activeWebhooks.filter((config) => config.events?.includes(event as any));
+    const activeWebhooks = await this.webhookRepository.find({
+      where: { isActive: true },
+    });
+    const targets = activeWebhooks.filter((config) =>
+      config.events?.includes(event as any),
+    );
 
     await Promise.all(
-      targets.map((config) => this.webhookDeliveryService.enqueueDelivery(config.id, event, payload, context)),
+      targets.map((config) =>
+        this.webhookDeliveryService.enqueueDelivery(
+          config.id,
+          event,
+          payload,
+          context,
+        ),
+      ),
     );
   }
 
   async publishEventsBatch(
-    events: Array<{ event: string; payload: unknown; context?: WebhookDeliveryContext }>,
+    events: Array<{
+      event: string;
+      payload: unknown;
+      context?: WebhookDeliveryContext;
+    }>,
   ): Promise<void> {
     if (!events.length) {
       return;
     }
 
-    const activeWebhooks = await this.webhookRepository.find({ where: { isActive: true } });
-    const byWebhook = new Map<string, Array<{ event: string; payload: unknown; context?: WebhookDeliveryContext }>>();
+    const activeWebhooks = await this.webhookRepository.find({
+      where: { isActive: true },
+    });
+    const byWebhook = new Map<
+      string,
+      Array<{
+        event: string;
+        payload: unknown;
+        context?: WebhookDeliveryContext;
+      }>
+    >();
 
     for (const entry of events) {
       for (const config of activeWebhooks) {
@@ -173,8 +219,12 @@ export class WebhookService {
   }> {
     const [total, delivered, failed] = await Promise.all([
       this.deliveryLogRepository.count({ where: { webhookConfigId } }),
-      this.deliveryLogRepository.count({ where: { webhookConfigId, status: WebhookDeliveryStatus.DELIVERED } }),
-      this.deliveryLogRepository.count({ where: { webhookConfigId, status: WebhookDeliveryStatus.FAILED } }),
+      this.deliveryLogRepository.count({
+        where: { webhookConfigId, status: WebhookDeliveryStatus.DELIVERED },
+      }),
+      this.deliveryLogRepository.count({
+        where: { webhookConfigId, status: WebhookDeliveryStatus.FAILED },
+      }),
     ]);
 
     const avgResult = await this.deliveryLogRepository
@@ -188,7 +238,9 @@ export class WebhookService {
       order: { deliveredAt: 'DESC' },
     });
 
-    const avgResponseTimeMs = avgResult?.avg ? Math.round(Number(avgResult.avg)) : 0;
+    const avgResponseTimeMs = avgResult?.avg
+      ? Math.round(Number(avgResult.avg))
+      : 0;
 
     this.logger.debug(`Webhook analytics computed for ${webhookConfigId}`);
 

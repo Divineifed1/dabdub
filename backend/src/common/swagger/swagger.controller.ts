@@ -16,7 +16,8 @@ export class SwaggerController {
       info: {
         name: 'Settlement API',
         description: 'Postman collection for Settlement API',
-        schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
+        schema:
+          'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
       },
       item: [
         {
@@ -49,7 +50,10 @@ export class SwaggerController {
     };
 
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', 'attachment; filename=settlement-api.postman_collection.json');
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=settlement-api.postman_collection.json',
+    );
     res.send(JSON.stringify(collection, null, 2));
   }
 

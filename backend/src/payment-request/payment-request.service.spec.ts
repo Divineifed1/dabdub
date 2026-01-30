@@ -59,7 +59,10 @@ describe('PaymentRequestService', () => {
         PaymentRequestService,
         { provide: PaymentRequestRepository, useValue: mockRepository },
         { provide: QrCodeService, useValue: mockQrCodeService },
-        { provide: StellarContractService, useValue: mockStellarContractService },
+        {
+          provide: StellarContractService,
+          useValue: mockStellarContractService,
+        },
         { provide: GlobalConfigService, useValue: mockConfigService },
       ],
     }).compile();
@@ -300,9 +303,9 @@ describe('PaymentRequestService', () => {
       } as any;
       mockRepository.findById.mockResolvedValue(pr);
 
-      await expect(
-        service.update('test-id', { amount: 20 }),
-      ).rejects.toThrow(PaymentRequestInvalidStatusException);
+      await expect(service.update('test-id', { amount: 20 })).rejects.toThrow(
+        PaymentRequestInvalidStatusException,
+      );
     });
   });
 

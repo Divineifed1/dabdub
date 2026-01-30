@@ -47,7 +47,10 @@ export class WebhooksService {
     });
   }
 
-  async findOne(merchantId: string, id: string): Promise<WebhookConfigurationEntity> {
+  async findOne(
+    merchantId: string,
+    id: string,
+  ): Promise<WebhookConfigurationEntity> {
     const webhook = await this.configRepository.findOne({
       where: { id, merchantId },
     });
@@ -72,11 +75,17 @@ export class WebhooksService {
     await this.configRepository.remove(webhook);
   }
 
-  async pause(merchantId: string, id: string): Promise<WebhookConfigurationEntity> {
+  async pause(
+    merchantId: string,
+    id: string,
+  ): Promise<WebhookConfigurationEntity> {
     return this.update(merchantId, id, { isActive: false });
   }
 
-  async resume(merchantId: string, id: string): Promise<WebhookConfigurationEntity> {
+  async resume(
+    merchantId: string,
+    id: string,
+  ): Promise<WebhookConfigurationEntity> {
     return this.update(merchantId, id, { isActive: true });
   }
 

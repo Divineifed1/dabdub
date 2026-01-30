@@ -17,6 +17,11 @@ import { MockPartnerService } from './services/mock-partner.service';
       useClass: MockPartnerService,
     },
   ],
-  exports: [SettlementRepository, SettlementService, TypeOrmModule, 'IPartnerService'],
+  exports: [
+    SettlementRepository,
+    SettlementService,
+    TypeOrmModule,
+    'IPartnerService',
+  ],
 })
-export class SettlementModule { }
+export class SettlementModule {}

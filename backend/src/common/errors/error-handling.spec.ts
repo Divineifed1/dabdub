@@ -85,7 +85,7 @@ describe('Error Handling System', () => {
             minLength: 'password must be longer than or equal to 8 characters',
           },
         },
-      ];
+      ] as any;
 
       const exception = new ValidationException(validationErrors);
       expect(exception.errorCode).toBe(ErrorCode.VALIDATION_ERROR);

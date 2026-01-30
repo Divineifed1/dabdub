@@ -83,7 +83,8 @@ export class AuthController {
   @Post('login')
   @ApiOperation({
     summary: 'User login',
-    description: 'Authenticates user with email and password, returns JWT tokens',
+    description:
+      'Authenticates user with email and password, returns JWT tokens',
   })
   @ApiHeader({
     name: 'User-Agent',

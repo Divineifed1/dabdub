@@ -57,7 +57,7 @@ export class ReportService {
     this.reports.set(reportId, job);
 
     // Process report asynchronously
-    this.processReport(reportId).catch((error) => {
+    this.processReport(reportId).catch((error: any) => {
       const job = this.reports.get(reportId);
       if (job) {
         job.status = 'failed';
@@ -114,7 +114,7 @@ export class ReportService {
       job.data = data;
       job.status = 'completed';
       job.completedAt = new Date();
-    } catch (error) {
+    } catch (error: any) {
       job.status = 'failed';
       job.error = error.message;
       throw error;

@@ -16,7 +16,7 @@ export class ApiKeyService {
     // Generate a secure 32-byte key with prefix
     const rawSecret = crypto.randomBytes(32).toString('base64url');
     const apiKey = `sk_stellar_${rawSecret}`;
-    
+
     const salt = await bcrypt.genSalt(12);
     const keyHash = await bcrypt.hash(apiKey, salt);
 
@@ -32,7 +32,9 @@ export class ApiKeyService {
 
   async validateKey(rawKey: string): Promise<ApiKey | null> {
     const prefix = rawKey.substring(0, 11);
-    const keysWithPrefix = await this.repo.find({ where: { prefix, isActive: true } });
+    const keysWithPrefix = await this.repo.find({
+      where: { prefix, isActive: true },
+    });
 
     for (const keyEntity of keysWithPrefix) {
       const isMatch = await bcrypt.compare(rawKey, keyEntity.keyHash);

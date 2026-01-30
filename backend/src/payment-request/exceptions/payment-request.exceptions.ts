@@ -1,5 +1,8 @@
 import { HttpException } from '@nestjs/common';
-import { ErrorCode, ErrorCodeMetadata } from '../../common/errors/error-codes.enum';
+import {
+  ErrorCode,
+  ErrorCodeMetadata,
+} from '../../common/errors/error-codes.enum';
 
 export class PaymentRequestException extends HttpException {
   public readonly errorCode: ErrorCode;

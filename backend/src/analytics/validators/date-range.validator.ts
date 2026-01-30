@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
-import { ANALYTICS_CONSTANTS, ERROR_MESSAGES } from '../constants/analytics.constants';
+import {
+  ValidationArguments,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator';
+import {
+  ANALYTICS_CONSTANTS,
+  ERROR_MESSAGES,
+} from '../constants/analytics.constants';
 
 /**
  * Custom validator for date ranges
@@ -31,7 +38,9 @@ export class DateRangeValidator implements ValidatorConstraintInterface {
     }
 
     // Check if range is within limits
-    const daysDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    const daysDiff = Math.ceil(
+      (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+    );
     if (daysDiff > ANALYTICS_CONSTANTS.MAX_DATE_RANGE_DAYS) {
       return false;
     }
@@ -55,7 +64,9 @@ export class DateRangeValidator implements ValidatorConstraintInterface {
       return ERROR_MESSAGES.INVALID_DATE_RANGE;
     }
 
-    const daysDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    const daysDiff = Math.ceil(
+      (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+    );
     if (daysDiff > ANALYTICS_CONSTANTS.MAX_DATE_RANGE_DAYS) {
       return ERROR_MESSAGES.DATE_RANGE_TOO_LARGE;
     }

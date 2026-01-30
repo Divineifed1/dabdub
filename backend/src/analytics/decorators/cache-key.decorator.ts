@@ -5,4 +5,5 @@ import { SetMetadata } from '@nestjs/common';
  */
 export const CACHE_KEY_METADATA = 'analytics:cache:key';
 
-export const CacheKey = (prefix: string) => SetMetadata(CACHE_KEY_METADATA, prefix);
+export const CacheKey = (prefix: string) =>
+  SetMetadata(CACHE_KEY_METADATA, prefix);

@@ -23,7 +23,8 @@ export class QrCodeService {
   }): string {
     const stellarConfig = this.configService.getStellarConfig();
     const network = params.network || stellarConfig.activeNetwork;
-    const passphrase = NETWORK_PASSPHRASES[network] || NETWORK_PASSPHRASES['testnet'];
+    const passphrase =
+      NETWORK_PASSPHRASES[network] || NETWORK_PASSPHRASES['testnet'];
 
     const uriParams = new URLSearchParams();
     uriParams.set('destination', params.destination);
@@ -52,9 +53,7 @@ export class QrCodeService {
       return buffer.toString('base64');
     } catch (error) {
       this.logger.error('Failed to generate QR code', error);
-      throw new PaymentRequestQrFailedException(
-        (error as Error).message,
-      );
+      throw new PaymentRequestQrFailedException((error as Error).message);
     }
   }
 }

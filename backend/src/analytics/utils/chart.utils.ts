@@ -6,13 +6,16 @@ export class ChartUtils {
   /**
    * Convert time-series data to Chart.js format
    */
-  static toChartJsFormat(data: Array<{ date: string; value: number }>, label: string = 'Data') {
+  static toChartJsFormat(
+    data: Array<{ date: string; value: number }>,
+    label: string = 'Data',
+  ) {
     return {
-      labels: data.map(d => d.date),
+      labels: data.map((d) => d.date),
       datasets: [
         {
           label,
-          data: data.map(d => d.value),
+          data: data.map((d) => d.value),
           borderColor: 'rgb(75, 192, 192)',
           backgroundColor: 'rgba(75, 192, 192, 0.2)',
           tension: 0.1,
@@ -28,10 +31,10 @@ export class ChartUtils {
     data: Array<{ date: string; [key: string]: any }>,
     series: Array<{ key: string; label: string; color?: string }>,
   ) {
-    const labels = data.map(d => d.date);
+    const labels = data.map((d) => d.date);
     const datasets = series.map((s, index) => ({
       label: s.label,
-      data: data.map(d => d[s.key]),
+      data: data.map((d) => d[s.key]),
       borderColor: s.color || this.getDefaultColor(index),
       backgroundColor: this.getDefaultBackgroundColor(index),
       tension: 0.1,
@@ -45,10 +48,10 @@ export class ChartUtils {
    */
   static toPieChartFormat(data: Array<{ label: string; value: number }>) {
     return {
-      labels: data.map(d => d.label),
+      labels: data.map((d) => d.label),
       datasets: [
         {
-          data: data.map(d => d.value),
+          data: data.map((d) => d.value),
           backgroundColor: data.map((_, i) => this.getDefaultColor(i)),
         },
       ],
@@ -58,14 +61,19 @@ export class ChartUtils {
   /**
    * Convert data to bar chart format
    */
-  static toBarChartFormat(data: Array<{ label: string; value: number }>, label: string = 'Data') {
+  static toBarChartFormat(
+    data: Array<{ label: string; value: number }>,
+    label: string = 'Data',
+  ) {
     return {
-      labels: data.map(d => d.label),
+      labels: data.map((d) => d.label),
       datasets: [
         {
           label,
-          data: data.map(d => d.value),
-          backgroundColor: data.map((_, i) => this.getDefaultBackgroundColor(i)),
+          data: data.map((d) => d.value),
+          backgroundColor: data.map((_, i) =>
+            this.getDefaultBackgroundColor(i),
+          ),
           borderColor: data.map((_, i) => this.getDefaultColor(i)),
           borderWidth: 1,
         },
@@ -113,7 +121,7 @@ export class ChartUtils {
     defaultValue: number = 0,
   ): Array<{ date: string; value: number }> {
     const result: Array<{ date: string; value: number }> = [];
-    const dataMap = new Map(data.map(d => [d.date, d.value]));
+    const dataMap = new Map(data.map((d) => [d.date, d.value]));
 
     const currentDate = new Date(startDate);
     while (currentDate <= endDate) {

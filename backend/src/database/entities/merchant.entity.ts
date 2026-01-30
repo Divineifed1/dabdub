@@ -1,51 +1,86 @@
 import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    CreateDateColumn,
-    UpdateDateColumn,
-    OneToMany,
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { Settlement } from '../../settlement/entities/settlement.entity';
 import { PaymentRequest } from './payment-request.entity';
 
 export enum MerchantStatus {
-    ACTIVE = 'active',
-    INACTIVE = 'inactive',
-    SUSPENDED = 'suspended',
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  SUSPENDED = 'suspended',
+}
+
+export enum KycStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  NOT_SUBMITTED = 'not_submitted',
 }
 
 @Entity('merchants')
 export class Merchant {
-    @PrimaryGeneratedColumn('uuid')
-    id!: string;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
-    @Column({ name: 'name', type: 'varchar', length: 255 })
-    name!: string;
+  @Column({ name: 'name', type: 'varchar', length: 255 })
+  name!: string;
 
-    @Column({ name: 'business_name', type: 'varchar', length: 255, nullable: true })
-    businessName!: string;
+  @Column({
+    name: 'business_name',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  businessName!: string;
 
-    @Column({ name: 'email', type: 'varchar', length: 255, unique: true })
-    email!: string;
+  @Column({ name: 'email', type: 'varchar', length: 255, unique: true })
+  email!: string;
 
-    @Column({
-        type: 'enum',
-        enum: MerchantStatus,
-        default: MerchantStatus.ACTIVE,
-    })
-    status!: MerchantStatus;
+  @Column({ name: 'password', type: 'varchar', length: 255 })
+  @Exclude()
+  password!: string;
 
-    @CreateDateColumn({ name: 'created_at' })
-    createdAt!: Date;
+  @Column({
+    type: 'enum',
+    enum: MerchantStatus,
+    default: MerchantStatus.ACTIVE,
+  })
+  status!: MerchantStatus;
 
-    @UpdateDateColumn({ name: 'updated_at' })
-    updatedAt!: Date;
+  @Column({
+    name: 'kyc_status',
+    type: 'enum',
+    enum: KycStatus,
+    default: KycStatus.NOT_SUBMITTED,
+  })
+  kycStatus!: KycStatus;
 
-    // Relationships
-    @OneToMany(() => Settlement, (settlement) => settlement.merchant)
-    settlements!: Settlement[];
+  @Column({ name: 'bank_details', type: 'jsonb', nullable: true })
+  @Exclude()
+  bankDetails!: Record<string, any>;
 
-    @OneToMany(() => PaymentRequest, (paymentRequest) => paymentRequest.merchant)
-    paymentRequests!: PaymentRequest[];
+  @Column({ name: 'documents', type: 'jsonb', nullable: true })
+  documents!: Record<string, any>;
+
+  @Column({ name: 'settings', type: 'jsonb', nullable: true })
+  settings!: Record<string, any>;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt!: Date;
+
+  // Relationships
+  @OneToMany(() => Settlement, (settlement) => settlement.merchant)
+  settlements!: Settlement[];
+
+  @OneToMany(() => PaymentRequest, (paymentRequest) => paymentRequest.merchant)
+  paymentRequests!: PaymentRequest[];
 }

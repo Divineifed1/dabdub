@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { HealthIndicator, HealthIndicatorResult, HealthCheckError } from '@nestjs/terminus';
+import {
+  HealthIndicator,
+  HealthIndicatorResult,
+  HealthCheckError,
+} from '@nestjs/terminus';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
@@ -35,7 +39,9 @@ export class BlockchainHealthIndicator extends HealthIndicator {
       };
 
       const response = await firstValueFrom(
-        this.httpService.post<{ result: string }>(rpcEndpoint, payload, { timeout: 2000 }),
+        this.httpService.post<{ result: string }>(rpcEndpoint, payload, {
+          timeout: 2000,
+        }),
       );
 
       const isUp = response.status === 200 && !!response.data?.result;
@@ -48,7 +54,7 @@ export class BlockchainHealthIndicator extends HealthIndicator {
       if (isUp) {
         return result;
       }
-      
+
       throw new HealthCheckError('Blockchain RPC check failed', result);
     } catch (error) {
       const err = error as Error;

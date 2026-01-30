@@ -21,7 +21,7 @@ export class MetricsInterceptor implements NestInterceptor {
     const ctx = context.switchToHttp();
     const request = ctx.getRequest();
     const { method, route } = request;
-    
+
     // Normalize path to avoid high cardinality (optional, depends on needs)
     // Using route.path if available, otherwise fallback to url
     const path = route ? route.path : request.url;

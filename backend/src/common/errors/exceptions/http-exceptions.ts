@@ -138,6 +138,27 @@ export class InternalServerErrorException extends BaseHttpException {
 }
 
 /**
+ * Insufficient Funds Exception (400)
+ */
+export class InsufficientFundsException extends BaseHttpException {
+  constructor(currentBalance: number, requiredAmount: number) {
+    super(ErrorCode.INSUFFICIENT_FUNDS, undefined, {
+      currentBalance,
+      requiredAmount,
+    });
+  }
+}
+
+/**
+ * Wallet Not Found Exception (404)
+ */
+export class WalletNotFoundException extends BaseHttpException {
+  constructor(walletId?: string) {
+    super(ErrorCode.WALLET_NOT_FOUND, undefined, { walletId });
+  }
+}
+
+/**
  * Bad Gateway Exception (502)
  */
 export class BadGatewayException extends BaseHttpException {

@@ -46,9 +46,7 @@ describe('PaymentRequestRepository', () => {
       ],
     }).compile();
 
-    repository = module.get<PaymentRequestRepository>(
-      PaymentRequestRepository,
-    );
+    repository = module.get<PaymentRequestRepository>(PaymentRequestRepository);
 
     jest.clearAllMocks();
     mockQueryBuilder.clone.mockReturnValue(mockQueryBuilder);
@@ -58,7 +56,11 @@ describe('PaymentRequestRepository', () => {
     it('should find pending requests past expiration', async () => {
       const now = new Date();
       const expired = [
-        { id: '1', status: PaymentRequestStatus.PENDING, expiresAt: new Date(Date.now() - 60000) },
+        {
+          id: '1',
+          status: PaymentRequestStatus.PENDING,
+          expiresAt: new Date(Date.now() - 60000),
+        },
       ];
       mockTypeOrmRepo.find.mockResolvedValue(expired);
 

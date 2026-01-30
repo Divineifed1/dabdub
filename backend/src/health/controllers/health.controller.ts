@@ -1,5 +1,16 @@
-import { Controller, Get, HttpStatus, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  HttpStatus,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { HealthCheck, HealthCheckResult } from '@nestjs/terminus';
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { HealthService } from '../services/health.service';
@@ -32,7 +43,8 @@ export class HealthController {
   @HealthCheck()
   @ApiOperation({
     summary: 'Readiness probe',
-    description: 'Checks if the application is ready to handle requests (DB, dependencies)',
+    description:
+      'Checks if the application is ready to handle requests (DB, dependencies)',
   })
   async checkReadiness(): Promise<HealthCheckResult> {
     return this.healthService.checkReadiness();
@@ -56,7 +68,8 @@ export class HealthController {
   @HealthCheck()
   @ApiOperation({
     summary: 'Detailed health check',
-    description: 'Performs comprehensive system checks (Auth required, Cached 5s)',
+    description:
+      'Performs comprehensive system checks (Auth required, Cached 5s)',
   })
   async checkDetailed(): Promise<HealthCheckResult> {
     return this.healthService.checkDetailed();
@@ -75,4 +88,3 @@ export class HealthController {
     };
   }
 }
-

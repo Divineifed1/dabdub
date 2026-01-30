@@ -56,7 +56,12 @@ export class WebhookConfigurationEntity {
   @Column({ name: 'disabled_at', type: 'timestamp', nullable: true })
   disabledAt?: Date;
 
-  @Column({ name: 'disabled_reason', type: 'varchar', length: 255, nullable: true })
+  @Column({
+    name: 'disabled_reason',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
   disabledReason?: string;
 
   @Column({ name: 'max_failure_count', type: 'int', default: 5 })

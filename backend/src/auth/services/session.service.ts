@@ -34,7 +34,9 @@ export class SessionService {
     return this.sessionRepository.save(session);
   }
 
-  async validateRefreshToken(refreshToken: string): Promise<SessionEntity | null> {
+  async validateRefreshToken(
+    refreshToken: string,
+  ): Promise<SessionEntity | null> {
     const session = await this.sessionRepository.findOne({
       where: {
         refreshToken,

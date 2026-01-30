@@ -15,7 +15,10 @@ export class SearchPaymentRequestDto {
   @IsUUID()
   merchantId?: string;
 
-  @ApiPropertyOptional({ description: 'Filter by status', enum: PaymentRequestStatus })
+  @ApiPropertyOptional({
+    description: 'Filter by status',
+    enum: PaymentRequestStatus,
+  })
   @IsOptional()
   @IsEnum(PaymentRequestStatus)
   status?: PaymentRequestStatus;

@@ -25,7 +25,8 @@ export const API_CHANGELOG: ApiVersion[] = [
       },
       {
         type: 'added',
-        description: 'Webhook delivery retry mechanism with exponential backoff',
+        description:
+          'Webhook delivery retry mechanism with exponential backoff',
         endpoints: ['/v1/webhooks'],
       },
       {

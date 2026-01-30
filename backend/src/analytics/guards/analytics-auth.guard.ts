@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Observable } from 'rxjs';
 
 /**
@@ -12,7 +17,7 @@ export class AnalyticsAuthGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
     const merchantId = request.query.merchantId || request.params.merchantId;
-    
+
     // TODO: Implement actual authentication check
     // For now, just validate merchantId exists
     if (!merchantId) {

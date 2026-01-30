@@ -34,7 +34,7 @@ export function setupSwagger(app: INestApplication): void {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  
+
   // Add custom metadata
   document.info.contact = {
     name: 'API Support',

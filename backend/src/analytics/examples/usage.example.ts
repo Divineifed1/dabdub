@@ -1,6 +1,6 @@
 /**
  * Analytics Module Usage Examples
- * 
+ *
  * This file demonstrates how to use the analytics module in your application
  */
 
@@ -31,7 +31,9 @@ export async function getDashboardExample(analyticsService: AnalyticsService) {
 /**
  * Example 2: Get Revenue Data for Charts
  */
-export async function getRevenueChartExample(analyticsService: AnalyticsService) {
+export async function getRevenueChartExample(
+  analyticsService: AnalyticsService,
+) {
   const merchantId = 'merchant-123';
   const { startDate, endDate } = DateUtils.getPresetRange('last7days');
 
@@ -44,7 +46,7 @@ export async function getRevenueChartExample(analyticsService: AnalyticsService)
 
   // Convert to Chart.js format
   const chartData = ChartUtils.toChartJsFormat(
-    revenue.data.map(d => ({ date: d.date, value: d.amount })),
+    revenue.data.map((d) => ({ date: d.date, value: d.amount })),
     'Revenue',
   );
 
@@ -54,7 +56,9 @@ export async function getRevenueChartExample(analyticsService: AnalyticsService)
 /**
  * Example 3: Get Transaction Trends
  */
-export async function getTransactionTrendsExample(analyticsService: AnalyticsService) {
+export async function getTransactionTrendsExample(
+  analyticsService: AnalyticsService,
+) {
   const merchantId = 'merchant-123';
   const startDate = new Date('2024-01-01');
   const endDate = new Date('2024-01-31');
@@ -71,7 +75,7 @@ export async function getTransactionTrendsExample(analyticsService: AnalyticsSer
 
   // Convert to multi-series chart
   const chartData = ChartUtils.toMultiSeriesChartJs(
-    trends.trends.map(t => ({
+    trends.trends.map((t) => ({
       date: t.period,
       success: t.successCount,
       failed: t.failedCount,
@@ -88,7 +92,9 @@ export async function getTransactionTrendsExample(analyticsService: AnalyticsSer
 /**
  * Example 4: Get Network Usage for Pie Chart
  */
-export async function getNetworkUsageExample(analyticsService: AnalyticsService) {
+export async function getNetworkUsageExample(
+  analyticsService: AnalyticsService,
+) {
   const merchantId = 'merchant-123';
   const { startDate, endDate } = DateUtils.getPresetRange('thisMonth');
 
@@ -100,7 +106,7 @@ export async function getNetworkUsageExample(analyticsService: AnalyticsService)
 
   // Convert to pie chart format
   const chartData = ChartUtils.toPieChartFormat(
-    networkUsage.networks.map(n => ({
+    networkUsage.networks.map((n) => ({
       label: n.network,
       value: n.transactionCount,
     })),
@@ -113,7 +119,9 @@ export async function getNetworkUsageExample(analyticsService: AnalyticsService)
 /**
  * Example 5: Get Customer Insights
  */
-export async function getCustomerInsightsExample(analyticsService: AnalyticsService) {
+export async function getCustomerInsightsExample(
+  analyticsService: AnalyticsService,
+) {
   const merchantId = 'merchant-123';
   const { startDate, endDate } = DateUtils.getPresetRange('last30days');
 
@@ -148,7 +156,7 @@ export async function generateReportExample(reportService: any) {
   console.log('Report ID:', reportId);
 
   // Wait for report to complete (in real app, use polling or webhooks)
-  await new Promise(resolve => setTimeout(resolve, 5000));
+  await new Promise((resolve) => setTimeout(resolve, 5000));
 
   // Download report
   const reportData = await reportService.downloadReport(reportId);

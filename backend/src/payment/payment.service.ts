@@ -42,7 +42,10 @@ export class PaymentService {
       if (data.status === PaymentStatus.COMPLETED) {
         this.metrics.incrementPaymentProcessed(payment.currency || 'USD');
       } else if (data.status === PaymentStatus.FAILED) {
-        this.metrics.incrementPaymentFailed(payment.currency || 'USD', data.reason || 'unknown');
+        this.metrics.incrementPaymentFailed(
+          payment.currency || 'USD',
+          data.reason || 'unknown',
+        );
       }
     }
   }

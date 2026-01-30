@@ -18,14 +18,21 @@ export class CreatePaymentRequestDto {
   @IsNotEmpty()
   merchantId!: string;
 
-  @ApiProperty({ description: 'Payment amount (USDC, 7 decimal places)', example: 10.5 })
+  @ApiProperty({
+    description: 'Payment amount (USDC, 7 decimal places)',
+    example: 10.5,
+  })
   @IsNumber()
   @Min(0.0000001)
   @Max(1000000)
   @IsNotEmpty()
   amount!: number;
 
-  @ApiProperty({ description: 'Currency code', example: 'USDC', default: 'USDC' })
+  @ApiProperty({
+    description: 'Currency code',
+    example: 'USDC',
+    default: 'USDC',
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(3)
@@ -64,7 +71,9 @@ export class CreatePaymentRequestDto {
   @IsDateString()
   expiresAt?: string;
 
-  @ApiPropertyOptional({ description: 'Idempotency key for duplicate detection' })
+  @ApiPropertyOptional({
+    description: 'Idempotency key for duplicate detection',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(255)

@@ -12,9 +12,11 @@ export class TwoFactorService {
     private readonly userRepository: Repository<UserEntity>,
   ) {}
 
-  async generateSecret(userId: string): Promise<{ secret: string; qrCode: string }> {
+  async generateSecret(
+    userId: string,
+  ): Promise<{ secret: string; qrCode: string }> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
-    
+
     if (!user) {
       throw new Error('User not found');
     }
@@ -38,7 +40,11 @@ export class TwoFactorService {
     };
   }
 
-  async enableTwoFactor(userId: string, secret: string, code: string): Promise<boolean> {
+  async enableTwoFactor(
+    userId: string,
+    secret: string,
+    code: string,
+  ): Promise<boolean> {
     const verified = speakeasy.totp.verify({
       secret,
       encoding: 'base32',

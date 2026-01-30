@@ -15,12 +15,17 @@ export class WebhookHealthMonitorService {
 
   @Cron(CronExpression.EVERY_5_MINUTES)
   async monitorHealth(): Promise<void> {
-    const activeWebhooks = await this.webhookRepository.find({ where: { isActive: true } });
+    const activeWebhooks = await this.webhookRepository.find({
+      where: { isActive: true },
+    });
     const now = new Date();
 
     await Promise.all(
       activeWebhooks.map(async (webhook) => {
-        if (webhook.maxFailureCount && webhook.failureCount >= webhook.maxFailureCount) {
+        if (
+          webhook.maxFailureCount &&
+          webhook.failureCount >= webhook.maxFailureCount
+        ) {
           webhook.isActive = false;
           webhook.disabledAt = now;
           webhook.disabledReason = 'Exceeded maximum failure count';

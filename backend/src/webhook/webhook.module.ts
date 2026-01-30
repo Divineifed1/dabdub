@@ -9,7 +9,12 @@ import { WebhookDeliveryService } from './services/webhook-delivery.service';
 import { WebhookHealthMonitorService } from './services/webhook-health-monitor.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([WebhookConfigurationEntity, WebhookDeliveryLogEntity])],
+  imports: [
+    TypeOrmModule.forFeature([
+      WebhookConfigurationEntity,
+      WebhookDeliveryLogEntity,
+    ]),
+  ],
   controllers: [WebhookController],
   providers: [
     WebhookService,

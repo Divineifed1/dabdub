@@ -49,8 +49,6 @@ export class ExpirationSchedulerService {
       });
     }
 
-    this.logger.log(
-      `Marked ${ids.length} payment requests as expired.`,
-    );
+    this.logger.log(`Marked ${ids.length} payment requests as expired.`);
   }
 }

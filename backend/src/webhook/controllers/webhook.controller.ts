@@ -40,7 +40,8 @@ export class WebhookController {
   @Post()
   @ApiOperation({
     summary: 'Create a webhook subscription',
-    description: 'Registers a new webhook endpoint for receiving settlement events',
+    description:
+      'Registers a new webhook endpoint for receiving settlement events',
   })
   @ApiResponse({
     status: HttpStatus.CREATED,
@@ -132,7 +133,12 @@ export class WebhookController {
     @Param('id') id: string,
     @Body() body: WebhookTestRequestDto,
   ): Promise<void> {
-    await this.webhookDeliveryService.enqueueDelivery(id, 'webhook.test', body?.payload ?? {}, {});
+    await this.webhookDeliveryService.enqueueDelivery(
+      id,
+      'webhook.test',
+      body?.payload ?? {},
+      {},
+    );
   }
 
   @Version('1')
@@ -148,7 +154,9 @@ export class WebhookController {
   @ApiOperation({
     summary: 'Replay a previous webhook delivery',
   })
-  async replayWebhook(@Param('deliveryLogId') deliveryLogId: string): Promise<void> {
+  async replayWebhook(
+    @Param('deliveryLogId') deliveryLogId: string,
+  ): Promise<void> {
     await this.webhookDeliveryService.replayDelivery(deliveryLogId);
   }
 
@@ -162,8 +170,15 @@ export class WebhookController {
     @Body() body: WebhookVerificationRequestDto,
   ): Promise<{ valid: boolean }> {
     const webhook = await this.webhookService.findOne(id);
-    const payloadString = this.webhookDeliveryService.serializePayloadForVerification(body.payload ?? {});
-    const valid = this.webhookDeliveryService.verifySignature(payloadString, webhook.secret, body.signature);
+    const payloadString =
+      this.webhookDeliveryService.serializePayloadForVerification(
+        body.payload ?? {},
+      );
+    const valid = this.webhookDeliveryService.verifySignature(
+      payloadString,
+      webhook.secret,
+      body.signature,
+    );
     return { valid };
   }
 

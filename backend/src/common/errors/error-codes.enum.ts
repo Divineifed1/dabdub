@@ -385,7 +385,8 @@ export const ErrorCodeMetadata: Record<
   [ErrorCode.PAYMENT_REQUEST_INVALID_STATUS]: {
     message: 'Invalid payment request status transition',
     httpStatus: 400,
-    userMessage: 'This action is not allowed for the current payment request status.',
+    userMessage:
+      'This action is not allowed for the current payment request status.',
   },
   [ErrorCode.PAYMENT_REQUEST_DUPLICATE]: {
     message: 'Duplicate payment request',
@@ -410,7 +411,8 @@ export const ErrorCodeMetadata: Record<
   [ErrorCode.PAYMENT_REQUEST_CANNOT_CANCEL]: {
     message: 'Payment request cannot be cancelled',
     httpStatus: 400,
-    userMessage: 'This payment request cannot be cancelled in its current state.',
+    userMessage:
+      'This payment request cannot be cancelled in its current state.',
   },
   [ErrorCode.PAYMENT_REQUEST_QR_FAILED]: {
     message: 'Failed to generate QR code',
@@ -422,11 +424,13 @@ export const ErrorCodeMetadata: Record<
   [ErrorCode.STELLAR_CONTRACT_ERROR]: {
     message: 'Stellar smart contract error',
     httpStatus: 502,
-    userMessage: 'An error occurred communicating with the blockchain. Please try again.',
+    userMessage:
+      'An error occurred communicating with the blockchain. Please try again.',
   },
   [ErrorCode.STELLAR_NETWORK_ERROR]: {
     message: 'Stellar network error',
     httpStatus: 503,
-    userMessage: 'The Stellar network is currently unavailable. Please try again later.',
+    userMessage:
+      'The Stellar network is currently unavailable. Please try again later.',
   },
 };

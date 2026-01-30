@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ApiKeyEntity } from '../../database/entities/api-key.entity';
@@ -76,8 +80,14 @@ export class ApiKeyService {
     }
 
     // Check IP whitelist
-    if (ipAddress && apiKey.allowedIps.length > 0 && !apiKey.allowedIps.includes(ipAddress)) {
-      throw new UnauthorizedException('IP address not whitelisted for this API key');
+    if (
+      ipAddress &&
+      apiKey.allowedIps.length > 0 &&
+      !apiKey.allowedIps.includes(ipAddress)
+    ) {
+      throw new UnauthorizedException(
+        'IP address not whitelisted for this API key',
+      );
     }
 
     // Update last used timestamp

@@ -110,8 +110,7 @@ export class GlobalConfigService {
   getRedisConfig(): RedisConfig {
     return this.getCachedConfig(
       'redis',
-      () =>
-        this.configService.get<RedisConfig>('redis') || ({} as RedisConfig),
+      () => this.configService.get<RedisConfig>('redis') || ({} as RedisConfig),
     );
   }
 

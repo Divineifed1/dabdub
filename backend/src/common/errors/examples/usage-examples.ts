@@ -9,7 +9,6 @@ import { Injectable, Controller, Post, Body, Get, Param } from '@nestjs/common';
 import {
   NotFoundException,
   BadRequestException,
-
   ValidationException,
 } from '../exceptions/http-exceptions';
 import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
@@ -51,7 +50,9 @@ export class WalletService {
     return { success: true };
   }
 
-  private async findWallet(walletId: string): Promise<{ balance: number } | null> {
+  private async findWallet(
+    walletId: string,
+  ): Promise<{ balance: number } | null> {
     // Mock implementation
     return { balance: 1000 };
   }

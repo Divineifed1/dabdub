@@ -31,7 +31,9 @@ export class AuthService {
   async register(registerDto: RegisterDto): Promise<UserEntity> {
     const { email, password, firstName, lastName } = registerDto;
 
-    const existingUser = await this.userRepository.findOne({ where: { email } });
+    const existingUser = await this.userRepository.findOne({
+      where: { email },
+    });
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }
@@ -52,7 +54,11 @@ export class AuthService {
     return this.userRepository.save(user);
   }
 
-  async login(loginDto: LoginDto, userAgent?: string, ipAddress?: string): Promise<any> {
+  async login(
+    loginDto: LoginDto,
+    userAgent?: string,
+    ipAddress?: string,
+  ): Promise<any> {
     const { email, password, twoFactorCode } = loginDto;
 
     const user = await this.userRepository.findOne({
@@ -63,7 +69,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const isPasswordValid = await this.passwordService.comparePassword(password, user.password);
+    const isPasswordValid = await this.passwordService.comparePassword(
+      password,
+      user.password,
+    );
 
     if (!isPasswordValid) {
       user.loginAttempts = (user.loginAttempts || 0) + 1;
@@ -127,12 +136,18 @@ export class AuthService {
     };
   }
 
-  async validateUser(email: string, password: string): Promise<UserEntity | null> {
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<UserEntity | null> {
     const user = await this.userRepository.findOne({
       where: { email, isActive: true },
     });
 
-    if (user && (await this.passwordService.comparePassword(password, user.password))) {
+    if (
+      user &&
+      (await this.passwordService.comparePassword(password, user.password))
+    ) {
       return user;
     }
 
@@ -142,7 +157,8 @@ export class AuthService {
   async refreshToken(refreshTokenDto: RefreshTokenDto): Promise<any> {
     const { refreshToken } = refreshTokenDto;
 
-    const session = await this.sessionService.validateRefreshToken(refreshToken);
+    const session =
+      await this.sessionService.validateRefreshToken(refreshToken);
 
     if (!session) {
       throw new UnauthorizedException('Invalid or expired refresh token');
@@ -150,7 +166,8 @@ export class AuthService {
 
     const user = session.user;
 
-    const { accessToken, refreshToken: newRefreshToken } = await this.generateTokens(user);
+    const { accessToken, refreshToken: newRefreshToken } =
+      await this.generateTokens(user);
 
     // Update session with new refresh token
     session.refreshToken = newRefreshToken;
@@ -220,7 +237,10 @@ export class AuthService {
       throw new BadRequestException('Invalid reset token');
     }
 
-    if (!user.passwordResetTokenExpiry || user.passwordResetTokenExpiry < new Date()) {
+    if (
+      !user.passwordResetTokenExpiry ||
+      user.passwordResetTokenExpiry < new Date()
+    ) {
       throw new BadRequestException('Reset token has expired');
     }
 

@@ -9,19 +9,19 @@ import { BlockchainMonitoringJob } from './jobs/blockchain-monitoring.job';
 import { BlockchainMonitoringController } from './controllers/blockchain-monitoring.controller';
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([
-            BlockchainNetwork,
-            BlockchainBlockCursor,
-            PaymentRequest,
-        ]),
-    ],
-    controllers: [BlockchainMonitoringController],
-    providers: [
-        BlockchainMonitoringService,
-        StellarClientService,
-        BlockchainMonitoringJob,
-    ],
-    exports: [BlockchainMonitoringService, BlockchainMonitoringJob],
+  imports: [
+    TypeOrmModule.forFeature([
+      BlockchainNetwork,
+      BlockchainBlockCursor,
+      PaymentRequest,
+    ]),
+  ],
+  controllers: [BlockchainMonitoringController],
+  providers: [
+    BlockchainMonitoringService,
+    StellarClientService,
+    BlockchainMonitoringJob,
+  ],
+  exports: [BlockchainMonitoringService, BlockchainMonitoringJob],
 })
-export class BlockchainModule { }
+export class BlockchainModule {}

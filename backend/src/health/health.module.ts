@@ -16,10 +16,6 @@ import { CacheModule } from '@nestjs/cache-manager';
     CacheModule.register(),
   ],
   controllers: [HealthController],
-  providers: [
-    HealthService, 
-    BlockchainHealthIndicator,
-    RedisHealthIndicator
-  ],
+  providers: [HealthService, BlockchainHealthIndicator, RedisHealthIndicator],
 })
 export class HealthModule {}

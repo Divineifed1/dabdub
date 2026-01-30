@@ -84,7 +84,15 @@ export class DateUtils {
   /**
    * Get date range presets
    */
-  static getPresetRange(preset: 'today' | 'yesterday' | 'last7days' | 'last30days' | 'thisMonth' | 'lastMonth'): { startDate: Date; endDate: Date } {
+  static getPresetRange(
+    preset:
+      | 'today'
+      | 'yesterday'
+      | 'last7days'
+      | 'last30days'
+      | 'thisMonth'
+      | 'lastMonth',
+  ): { startDate: Date; endDate: Date } {
     const now = new Date();
     const today = this.startOfDay(now);
 
@@ -94,12 +102,13 @@ export class DateUtils {
           startDate: today,
           endDate: this.endOfDay(now),
         };
-      case 'yesterday':
+      case 'yesterday': {
         const yesterday = this.subtractDays(today, 1);
         return {
           startDate: yesterday,
           endDate: this.endOfDay(yesterday),
         };
+      }
       case 'last7days':
         return {
           startDate: this.subtractDays(today, 7),
@@ -115,13 +124,14 @@ export class DateUtils {
           startDate: this.startOfMonth(now),
           endDate: this.endOfDay(now),
         };
-      case 'lastMonth':
+      case 'lastMonth': {
         const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
         const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
         return {
           startDate: this.startOfMonth(lastMonth),
           endDate: this.endOfDay(lastMonthEnd),
         };
+      }
       default:
         return {
           startDate: this.subtractDays(today, 30),
