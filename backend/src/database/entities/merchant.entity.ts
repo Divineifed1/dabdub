@@ -9,6 +9,7 @@ import {
 import { Exclude } from 'class-transformer';
 import { Settlement } from '../../settlement/entities/settlement.entity';
 import { PaymentRequest } from './payment-request.entity';
+import { WebhookConfigurationEntity } from './webhook-configuration.entity';
 
 /**
  * Merchant account status
@@ -90,6 +91,12 @@ export class Merchant {
 
   @OneToMany(() => PaymentRequest, (paymentRequest) => paymentRequest.merchant)
   paymentRequests!: PaymentRequest[];
+
+  @OneToMany(
+    () => WebhookConfigurationEntity,
+    (webhookConfig) => webhookConfig.merchant,
+  )
+  webhookConfigurations!: WebhookConfigurationEntity[];
 }
 
 /**
