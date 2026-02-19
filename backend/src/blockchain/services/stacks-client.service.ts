@@ -30,12 +30,12 @@ export class StacksClientService implements IBlockchainClient {
             const { data: blockData, error: blockError } = await client.GET('/extended/v1/block/by_height/{height}', {
                 params: { path: { height: Number(blockNumber) } }
             });
-            if (blockError) throw blockError;
+            if (blockError) throw new Error(JSON.stringify(blockError));
 
             const { data: txsData, error: txsError } = await client.GET('/extended/v1/tx/block_height/{height}', {
                 params: { path: { height: Number(blockNumber) } }
             });
-            if (txsError) throw txsError;
+            if (txsError) throw new Error(JSON.stringify(txsError));
 
             const transactions: BlockchainTransaction[] = (txsData.results as any[]).map(tx => ({
                 hash: tx.tx_id,

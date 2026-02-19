@@ -83,7 +83,7 @@ export class StacksService {
             const { data, error } = await this.client.GET('/extended/v1/address/{principal}/nonces', {
                 params: { path: { principal: address } }
             });
-            if (error) throw error;
+            if (error) throw new Error(JSON.stringify(error));
             return BigInt((data as any).possible_next_nonce);
         } catch (error) {
             this.logger.error(`Error fetching nonce for ${address}:`, error);
@@ -162,7 +162,7 @@ export class StacksService {
             const { data, error } = await this.client.POST('/extended/v1/fee_rate/', {
                 body: { transaction: txBytes }
             });
-            if (error) throw error;
+            if (error) throw new Error(JSON.stringify(error));
             return data;
         } catch (error) {
             this.logger.error('Error estimating fees:', error);
@@ -173,7 +173,7 @@ export class StacksService {
     async getApiStatus() {
         try {
             const { data, error } = await this.client.GET('/extended');
-            if (error) throw error;
+            if (error) throw new Error(JSON.stringify(error));
             return data;
         } catch (error) {
             this.logger.error('Error fetching API status:', error);

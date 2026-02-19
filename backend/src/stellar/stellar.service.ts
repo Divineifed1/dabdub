@@ -160,7 +160,7 @@ export class StellarService implements OnModuleInit {
                     callback(payment);
                 },
                 onerror: (error) => {
-                    this.logger.error(`Error in payment stream: ${error}`);
+                    this.logger.error(`Error in payment stream: ${JSON.stringify(error)}`);
                 }
             });
     }
