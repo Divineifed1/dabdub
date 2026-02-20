@@ -25,6 +25,7 @@ import { AuthModule } from './auth/auth.module';
 import { PublicModule } from './public/public.module';
 import { PaymentRequestModule } from './payment-request/payment-request.module';
 import { MerchantModule } from './merchant/merchant.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 // Middleware
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { EVMModule } from './evm/evm.module';
@@ -82,6 +83,7 @@ import { ExchangeRateModule } from './exchange-rate/exchange-rate.module';
     EVMModule,
     PaymentRequestModule,
     MerchantModule,
+    DashboardModule,
     MonitoringModule,
     MerchantModule,
     ExchangeRateModule,
