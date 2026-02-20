@@ -26,7 +26,7 @@ async function bootstrap() {
   // Global validation pipe
   app.useGlobalPipes(new CustomValidationPipe());
 
-  // Enable CORS with strict config
+  // Enable CORS with strict configuration
   const whitelist = process.env.CORS_WHITELIST ? process.env.CORS_WHITELIST.split(',') : [];
   app.enableCors({
     origin: (origin: string, callback: (err: Error | null, origin?: boolean) => void) => {
