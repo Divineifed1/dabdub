@@ -30,8 +30,12 @@
     "db:reset": "npm run migration:revert && npm run migration:run && npm run seed:run"
   },
   "dependencies": {
+    "@bull-board/api": "^6.19.0",
+    "@bull-board/express": "^6.19.0",
+    "@bull-board/nestjs": "^6.19.0",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/bull": "^11.0.4",
+    "@nestjs/bullmq": "^11.0.4",
     "@nestjs/cache-manager": "^3.1.0",
     "@nestjs/common": "^11.1.12",
     "@nestjs/config": "^1.1.5",
@@ -63,6 +67,7 @@
     "@willsoto/nestjs-prometheus": "^6.0.2",
     "bcrypt": "^6.0.0",
     "bull": "^4.16.5",
+    "bullmq": "^5.69.3",
     "cache-manager": "^7.2.8",
     "cache-manager-ioredis-yet": "^2.1.2",
     "cache-manager-redis-store": "^2.0.0",

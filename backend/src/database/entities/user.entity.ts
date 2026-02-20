@@ -11,6 +11,7 @@ import { SessionEntity } from './session.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
+  SUPER_ADMIN = 'super_admin',
   MERCHANT = 'merchant',
   USER = 'user',
   SUPPORT_ADMIN = 'support_admin',
@@ -22,6 +23,7 @@ export const RESTRICTED_FOR_SUPPORT_ADMIN = new Set(['analytics:revenue']);
 /** Role-to-permissions map for admin users. */
 export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   [UserRole.ADMIN]: ['analytics:revenue', 'analytics:read'],
+  [UserRole.SUPER_ADMIN]: ['analytics:revenue', 'analytics:read', 'admin:queues'],
   [UserRole.SUPPORT_ADMIN]: ['analytics:read'],
   [UserRole.MERCHANT]: [],
   [UserRole.USER]: [],
