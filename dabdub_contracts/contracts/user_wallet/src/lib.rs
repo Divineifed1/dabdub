@@ -42,6 +42,8 @@ struct TransferredToVaultEvent {
     payment_amount: i128,
     fee_amount: i128,
     total_amount: i128,
+    is_claim_based: bool,
+    recipient: Option<Address>,
 }
 
 #[contract]
@@ -175,6 +177,9 @@ impl UserWallet {
             panic!("Invalid fee");
         }
 
+        let (claim_period_enabled, _claim_period_duration) = vault_client.get_claim_period();
+        let is_claim_based = claim_period_enabled && recipient.is_some();
+
         let total_amount = payment_amount
             .checked_add(fee_amount)
             .expect("Amount overflow");
@@ -193,6 +198,8 @@ impl UserWallet {
             payment_amount,
             fee_amount,
             total_amount,
+            is_claim_based,
+            recipient,
         }
         .publish(&env);
 
