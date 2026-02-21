@@ -58,5 +58,30 @@ export class AdminRefreshTokenDto {
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
   })
   @IsString()
-  refresh_token: string;
+  refreshToken: string;
+}
+
+export class AdminSessionDto {
+  @ApiProperty({ description: 'Session ID', example: 'session_uuid' })
+  sessionId: string;
+
+  @ApiProperty({ description: 'IP Address', example: '192.168.1.1' })
+  ip: string;
+
+  @ApiProperty({ description: 'User Agent', example: 'Mozilla/5.0...' })
+  userAgent: string;
+
+  @ApiProperty({ description: 'Creation time', example: '2026-02-15T10:00:00Z' })
+  createdAt: string;
+
+  @ApiProperty({ description: 'Last used time', example: '2026-02-18T15:30:00Z' })
+  lastUsedAt: string;
+
+  @ApiProperty({ description: 'Is current session', example: true })
+  isCurrent: boolean;
+}
+
+export class AdminSessionListResponseDto {
+  @ApiProperty({ type: [AdminSessionDto] })
+  sessions: AdminSessionDto[];
 }

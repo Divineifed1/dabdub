@@ -1,8 +1,12 @@
 import {
   Controller,
   Post,
+  Get,
+  Delete,
+  Param,
   Body,
   Request,
+  Res,
   HttpStatus,
   UseGuards,
   Logger,
@@ -20,6 +24,7 @@ import {
   AdminLoginDto,
   AdminLoginResponseDto,
   AdminRefreshTokenDto,
+  AdminSessionListResponseDto,
 } from '../dto/admin-auth.dto';
 import { Request as ExpressRequest } from 'express';
 
@@ -115,28 +120,92 @@ export class AdminAuthController {
     description: 'Invalidates the admin refresh token and logs out the admin user',
   })
   @ApiResponse({
-    status: HttpStatus.OK,
+    status: HttpStatus.NO_CONTENT,
     description: 'Logout successful',
-    schema: {
-      type: 'object',
-      properties: {
-        message: { type: 'string', example: 'Logout successful' },
-      },
-    },
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
     description: 'Invalid or missing admin token',
   })
-  async logout(@Request() req: any): Promise<{ message: string }> {
-    const refreshToken = req.body?.refresh_token;
+  async logout(@Request() req: any, @Res({ passthrough: true }) res: any): Promise<void> {
+    const adminId = req.user?.sub;
+    const sessionId = req.user?.sessionId;
+    const refreshToken = req.body?.refreshToken;
     
-    if (refreshToken) {
-      await this.adminAuthService.logout(refreshToken);
+    if (adminId && sessionId) {
+      await this.adminAuthService.logout(adminId, sessionId, refreshToken);
     }
 
     this.logger.log(`Admin logout for user ${req.user?.email}`);
 
-    return { message: 'Logout successful' };
+    res.status(HttpStatus.NO_CONTENT).send();
+  }
+
+  @Post('logout-all')
+  @UseGuards(AdminJwtGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Admin logout all',
+    description: 'Invalidates all admin sessions and tokens',
+  })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Logout all successful',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or missing admin token',
+  })
+  async logoutAll(@Request() req: any, @Res({ passthrough: true }) res: any): Promise<void> {
+    const adminId = req.user?.sub;
+
+    if (adminId) {
+      await this.adminAuthService.logoutAll(adminId);
+    }
+    this.logger.log(`Admin logout all for user ${req.user?.email}`);
+    res.status(HttpStatus.NO_CONTENT).send();
+  }
+
+  @Get('sessions')
+  @UseGuards(AdminJwtGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get admin sessions',
+    description: 'Lists all active sessions for the current admin',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'List of sessions returned successfully',
+    type: AdminSessionListResponseDto,
+  })
+  async getSessions(@Request() req: any): Promise<AdminSessionListResponseDto> {
+    const adminId = req.user?.sub;
+    const currentSessionId = req.user?.sessionId;
+    
+    const sessions = await this.adminAuthService.getSessions(adminId, currentSessionId);
+    return { sessions };
+  }
+
+  @Delete('sessions/:sessionId')
+  @UseGuards(AdminJwtGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Revoke an admin session',
+    description: 'Revokes a specific session',
+  })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Session revoked successfully',
+  })
+  async revokeSession(
+    @Request() req: any,
+    @Param('sessionId') sessionIdToRevoke: string,
+    @Res({ passthrough: true }) res: any,
+  ): Promise<void> {
+    const adminId = req.user?.sub;
+    const role = req.user?.role;
+    
+    await this.adminAuthService.revokeSession(adminId, role, sessionIdToRevoke);
+    res.status(HttpStatus.NO_CONTENT).send();
   }
 }

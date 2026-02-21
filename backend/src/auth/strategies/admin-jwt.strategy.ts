@@ -13,6 +13,7 @@ export interface AdminJwtPayload {
   iat: number;
   exp: number;
   type: 'admin';
+  sessionId: string;
 }
 
 @Injectable()
@@ -55,6 +56,7 @@ export class AdminJwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
       throw new UnauthorizedException('Admin role required');
     }
 
+    (user as any).sessionId = payload.sessionId;
     return user;
   }
 }
