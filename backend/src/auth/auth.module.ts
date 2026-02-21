@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { AuthService } from './services/auth.service';
 import { AuthController } from './controllers/auth.controller';
 import { AdminAuthController } from './controllers/admin-auth.controller';
+import { TwoFactorController } from './controllers/two-factor.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { AdminJwtStrategy } from './strategies/admin-jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
@@ -16,6 +17,7 @@ import { SessionEntity } from '../database/entities/session.entity';
 import { AdminSessionEntity } from './entities/admin-session.entity';
 import { AdminLoginAttemptEntity } from './entities/admin-login-attempt.entity';
 import { TwoFactorService } from './services/two-factor.service';
+import { AdminTwoFactorService } from './services/admin-two-factor.service';
 import { PasswordService } from './services/password.service';
 import { SessionService } from './services/session.service';
 import { AdminAuthService } from './services/admin-auth.service';
@@ -24,6 +26,7 @@ import { JwtGuard } from './guards/jwt.guard';
 import { AdminJwtGuard } from './guards/admin-jwt.guard';
 import { RequirePermissionGuard } from './guards/require-permission.guard';
 import { AdminThrottlerGuard } from '../common/guards/admin-throttler.guard';
+import { CryptoModule } from '../common/crypto/crypto.module';
 
 @Module({
   imports: [
@@ -46,8 +49,9 @@ import { AdminThrottlerGuard } from '../common/guards/admin-throttler.guard';
         },
       }),
     }),
+    CryptoModule,
   ],
-  controllers: [AuthController, AdminAuthController],
+  controllers: [AuthController, AdminAuthController, TwoFactorController],
   providers: [
     AuthService,
     AdminAuthService,
@@ -56,6 +60,7 @@ import { AdminThrottlerGuard } from '../common/guards/admin-throttler.guard';
     LocalStrategy,
     ApiKeyStrategy,
     TwoFactorService,
+    AdminTwoFactorService,
     PasswordService,
     SessionService,
     ApiKeyService,

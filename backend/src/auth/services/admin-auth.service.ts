@@ -84,6 +84,33 @@ export class AdminAuthService {
       });
       await this.adminLoginAttemptRepository.save(loginAttempt);
 
+      // Check if 2FA is enabled
+      if (user.twoFactorEnabled) {
+        // Issue a short-lived 2FA token instead of full access
+        const sessionId = uuidv4();
+        const twoFactorTokenPayload = {
+          sub: user.id,
+          type: '2fa_pending',
+          sessionId,
+          userAgent,
+          ipAddress,
+          iat: Math.floor(Date.now() / 1000),
+          exp: Math.floor(Date.now() / 1000) + 300, // 5 minutes
+        };
+
+        const twoFactorToken = this.jwtService.sign(twoFactorTokenPayload, {
+          expiresIn: 300,
+        });
+
+        this.logger.log(`2FA required for admin ${email}`);
+
+        return {
+          requires2FA: true,
+          twoFactorToken,
+          message: 'Please provide your 2FA code to complete login',
+        };
+      }
+
       // Generate tokens
       const adminJwtExpiresIn = this.configService.get<string>('ADMIN_JWT_EXPIRES_IN') || '2h';
       const refreshTokenExpiresIn = '7d';
