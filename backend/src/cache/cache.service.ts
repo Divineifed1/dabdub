@@ -242,6 +242,74 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
+   * Set hash field value
+   */
+  async hset(key: string, field: string, value: string): Promise<number> {
+    if (!this.redisClient || !this.isRedisAvailable) {
+      return 0;
+    }
+
+    try {
+      return await this.redisClient.hset(key, field, value);
+    } catch (error) {
+      this.logger.error(`Cache hset error for key ${key}:`, error);
+      return 0;
+    }
+  }
+
+  /**
+   * Get hash field value
+   */
+  async hget(key: string, field: string): Promise<string | null> {
+    if (!this.redisClient || !this.isRedisAvailable) {
+      return null;
+    }
+
+    try {
+      return await this.redisClient.hget(key, field);
+    } catch (error) {
+      this.logger.error(`Cache hget error for key ${key}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Get all hash fields and values
+   */
+  async hgetall(key: string): Promise<Record<string, string> | null> {
+    if (!this.redisClient || !this.isRedisAvailable) {
+      return null;
+    }
+
+    try {
+      const result = await this.redisClient.hgetall(key);
+      if (Object.keys(result).length === 0) {
+        return null;
+      }
+      return result;
+    } catch (error) {
+      this.logger.error(`Cache hgetall error for key ${key}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Delete hash field
+   */
+  async hdel(key: string, field: string): Promise<number> {
+    if (!this.redisClient || !this.isRedisAvailable) {
+      return 0;
+    }
+
+    try {
+      return await this.redisClient.hdel(key, field);
+    } catch (error) {
+      this.logger.error(`Cache hdel error for key ${key}:`, error);
+      return 0;
+    }
+  }
+
+  /**
    * Get or set value using cache-aside pattern
    */
   async getOrSet<T>(
