@@ -50,6 +50,7 @@ import { MaintenanceModule } from './maintenance/maintenance.module';
 // import { SentryModule } from '@sentry/nestjs';
 import { AlertModule } from './alert/alert.module';
 import { CustomReportModule } from './custom-report/custom-report.module';
+import { FeatureFlagModule } from './feature-flag/feature-flag.module';
 
 @Module({
   imports: [
@@ -107,6 +108,7 @@ import { CustomReportModule } from './custom-report/custom-report.module';
     MaintenanceModule,
     AlertModule,
     CustomReportModule,
+    FeatureFlagModule,
   ],
   controllers: [AppController],
   providers: [

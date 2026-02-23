@@ -12,7 +12,10 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { KycStatus, MerchantStatus } from '../../database/entities/merchant.entity';
+import {
+  KycStatus,
+  MerchantStatus,
+} from '../../database/entities/merchant.entity';
 import { ApiKey } from '../../api-key/entities/api-key.entity';
 
 export enum MerchantTier {
@@ -184,7 +187,6 @@ export class MerchantDetailResponseDto {
   @ApiProperty()
   updatedAt: Date;
 }
-
 
 export class RegisterMerchantDto {
   @ApiProperty({ example: 'John Doe' })
