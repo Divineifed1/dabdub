@@ -34,6 +34,9 @@ export class Payment {
   @Column({ nullable: true })
   network!: string;
 
+  @Column({ type: 'uuid', nullable: true })
+  merchantId?: string;
+
   @Column({ nullable: true })
   description?: string;
 

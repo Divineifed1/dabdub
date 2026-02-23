@@ -39,6 +39,7 @@ import { StellarModule } from './stellar/stellar.module';
 import { MonitoringModule } from './monitoring/monitoring.module';
 import { ExchangeRateModule } from './exchange-rate/exchange-rate.module';
 import { MerchantsModule } from './admin/merchants/merchants.module';
+import { AdminModule } from './admin/admin.module';
 import { AuditModule } from './audit/audit.module';
 import { AdminMeModule } from './admin-me/admin-me.module';
 import { SecurityModule } from './security/security.module';
@@ -98,6 +99,7 @@ import { AlertModule } from './alert/alert.module';
     KycModule,
     ExchangeRateModule,
     AdminMeModule,
+    AdminModule,
     MerchantsModule,
     SecurityModule,
     SandboxModule,

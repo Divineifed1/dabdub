@@ -4,8 +4,8 @@ import { Repository, DataSource } from 'typeorm';
 import {
   TRANSACTION_REPORT_HEADERS,
   TransactionReportRow,
-} from '../interfaces/transaction-report-row.interface';
-import { ComplianceReportType, ReportFormat } from '../enums/compliance-report.enum';
+} from './transaction-report-row.interface';
+import { ComplianceReportType, ReportFormat } from './compliance-report.enum';
 
 interface ReportBuildResult {
   content: Buffer;
@@ -16,7 +16,7 @@ interface ReportBuildResult {
 export class ReportBuilderService {
   private readonly logger = new Logger(ReportBuilderService.name);
 
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(private readonly dataSource: DataSource) { }
 
   async build(
     reportType: ComplianceReportType,

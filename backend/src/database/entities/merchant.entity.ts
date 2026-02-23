@@ -37,7 +37,6 @@ export enum KycStatus {
   REJECTED = 'rejected',
   NOT_SUBMITTED = 'not_submitted',
   IN_REVIEW = 'in_review',
-  UNDER_REVIEW = 'in_review',
 }
 
 export enum BankAccountStatus {

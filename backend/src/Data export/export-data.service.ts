@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { ExportResourceType } from '../enums/export.enums';
+import { ExportResourceType } from './export.enums';
 
 interface FetchBatchResult {
   data: Record<string, unknown>[];
@@ -16,13 +16,19 @@ interface FetchBatchResult {
  */
 @Injectable()
 export class ExportDataService {
-  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
+  constructor(@InjectDataSource() private readonly dataSource: DataSource) { }
 
   async countRows(
     resourceType: ExportResourceType,
     filters: Record<string, unknown>,
   ): Promise<number> {
-    const { sql, params } = this.buildQuery(resourceType, filters, null, 1, true);
+    const { sql, params } = this.buildQuery(
+      resourceType,
+      filters,
+      null,
+      1,
+      true,
+    );
     const result = await this.dataSource.query(sql, params);
     return parseInt(result[0].count, 10);
   }
@@ -33,8 +39,17 @@ export class ExportDataService {
     cursor: string | null,
     batchSize: number,
   ): Promise<FetchBatchResult> {
-    const { sql, params } = this.buildQuery(resourceType, filters, cursor, batchSize, false);
-    const rows: Record<string, unknown>[] = await this.dataSource.query(sql, params);
+    const { sql, params } = this.buildQuery(
+      resourceType,
+      filters,
+      cursor,
+      batchSize,
+      false,
+    );
+    const rows: Record<string, unknown>[] = await this.dataSource.query(
+      sql,
+      params,
+    );
 
     const nextCursor =
       rows.length === batchSize ? String(rows[rows.length - 1]['id']) : null;
