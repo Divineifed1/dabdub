@@ -22,5 +22,7 @@ export const RedisKeys = {
   // Security
   ipBlocks: () => 'security:ip_blocks',
   ipBlock: (cidr: string) => `security:ip_block:${cidr}`,
-  merchantIpAllowlist: (merchantId: string) => `security:merchant_ip_allowlist:${merchantId}`,
+  merchantIpAllowlist: (merchantId: string) =>
+    `security:merchant_ip_allowlist:${merchantId}`,
+  revokedSession: (sessionId: string) => `auth:revoked_session:${sessionId}`,
 };

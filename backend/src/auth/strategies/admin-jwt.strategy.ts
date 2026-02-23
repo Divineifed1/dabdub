@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity, UserRole } from '../../database/entities/user.entity';
+import { RedisService } from '@common/redis';
 
 export interface AdminJwtPayload {
   sub: string;
@@ -22,6 +23,7 @@ export class AdminJwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
     configService: ConfigService,
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    private readonly redisService: RedisService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -42,6 +44,11 @@ export class AdminJwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
     if (!adminRoles.includes(payload.role)) {
       throw new UnauthorizedException('Admin role required');
     }
+
+    const revoked = await this.redisService.get(
+      `auth:revoked_session:${payload.sessionId}`,
+    );
+    if (revoked) throw new UnauthorizedException('Session has been terminated');
 
     const user = await this.userRepository.findOne({
       where: { id: payload.sub, isActive: true },
