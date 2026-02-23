@@ -31,6 +31,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     'merchants:read',
     'merchants:write',
     'config:read',
+    'config:write',
   ],
   [UserRole.SUPER_ADMIN]: [
     'analytics:revenue',
@@ -54,6 +55,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     'merchants:kyc:review',
     'merchants:read',
     'merchants:write',
+    'config:read',
   ],
   [UserRole.MERCHANT]: [],
   [UserRole.USER]: [],

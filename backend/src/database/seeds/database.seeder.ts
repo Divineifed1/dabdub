@@ -8,6 +8,7 @@ import { PaymentRequestSeeder } from './payment-request.seeder';
 import { NetworkConfigSeeder } from './network-config.seeder';
 import { ExchangeRateSeeder } from './exchange-rate.seeder';
 import { SeedVersionSeeder } from './seed-version.seeder';
+import { ScheduledJobsSeeder } from './scheduled-jobs.seeder';
 
 const SEED_VERSION = '1.0.0';
 
@@ -57,6 +58,10 @@ async function runSeeds() {
     await PaymentRequestSeeder.seed(dataSource);
     console.log('');
 
+    console.log('⏰ Seeding scheduled jobs...');
+    await ScheduledJobsSeeder.seed(dataSource);
+    console.log('');
+
     // Record seed version
     await SeedVersionSeeder.recordVersion(
       dataSource,
@@ -66,7 +71,7 @@ async function runSeeds() {
 
     console.log('✅ Database seeding completed successfully!');
     console.log(`📦 Seed version: ${SEED_VERSION}\n`);
-    
+
     await dataSource.destroy();
     process.exit(0);
   } catch (error) {

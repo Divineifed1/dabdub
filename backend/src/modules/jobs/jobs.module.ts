@@ -17,6 +17,7 @@ import { RefundProcessor } from './processors/refund.processor';
 import { ComplianceReportProcessor } from './processors/compliance-report.processor';
 import { WebhookProcessor } from './processors/webhook.processor';
 import { JobPermanentFailureService } from './job-permanent-failure.service';
+import { ScheduledJobsModule } from './scheduled/scheduled-jobs.module';
 
 @Module({
   imports: [
@@ -102,6 +103,7 @@ import { JobPermanentFailureService } from './job-permanent-failure.service';
       { name: 'compliance-reports', adapter: BullMQAdapter },
       { name: 'webhooks', adapter: BullMQAdapter },
     ),
+    ScheduledJobsModule,
   ],
   controllers: [JobsController],
   providers: [
@@ -117,4 +119,4 @@ import { JobPermanentFailureService } from './job-permanent-failure.service';
   ],
   exports: [JobsService, BullModule, BullBoardAuthMiddleware],
 })
-export class JobsModule {}
+export class JobsModule { }
