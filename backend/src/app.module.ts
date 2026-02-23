@@ -41,6 +41,7 @@ import { MerchantsModule } from './admin/merchants/merchants.module';
 import { AuditModule } from './audit/audit.module';
 import { SecurityModule } from './security/security.module';
 import { SandboxModule } from './sandbox/sandbox.module';
+import { MaintenanceModule } from './maintenance/maintenance.module';
 
 // TODO: Enable Sentry when @sentry/nestjs module is compatible
 // import { SentryModule } from '@sentry/nestjs';
@@ -95,6 +96,7 @@ import { SandboxModule } from './sandbox/sandbox.module';
     MerchantsModule,
     SecurityModule,
     SandboxModule,
+    MaintenanceModule,
   ],
   controllers: [AppController],
   providers: [
