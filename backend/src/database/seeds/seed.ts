@@ -3,6 +3,7 @@ import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import * as path from 'path';
 import { AdminUserSeeder } from './admin-user.seed';
+import { AdminUserV1Seeder } from './admin-user-v1.seed';
 import { RolesSeeder } from './roles.seed';
 import { UserSeeder } from './user.seeder';
 import { MerchantSeeder } from './merchant.seeder';
@@ -37,6 +38,9 @@ async function runSeeds() {
 
     console.log('🔐 Seeding bootstrap admin...');
     await AdminUserSeeder.seed(dataSource);
+
+    console.log('🔐 Seeding admin users (v1 auth)...');
+    await AdminUserV1Seeder.seed(dataSource);
 
     console.log('\n🎭 Seeding roles and permissions...');
     await RolesSeeder.seed(dataSource);

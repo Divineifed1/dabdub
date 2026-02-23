@@ -4,9 +4,16 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class PasswordService {
   private readonly saltRounds = 10;
+  /** Bcrypt rounds for admin users (spec: 12). */
+  private readonly adminSaltRounds = 12;
 
   async hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, this.saltRounds);
+  }
+
+  /** Hash password for admin users (12 rounds per security spec). */
+  async hashPasswordForAdmin(password: string): Promise<string> {
+    return bcrypt.hash(password, this.adminSaltRounds);
   }
 
   async comparePassword(

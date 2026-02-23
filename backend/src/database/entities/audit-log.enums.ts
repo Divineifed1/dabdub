@@ -11,6 +11,7 @@ export enum AuditAction {
   FEATURE_FLAG_OVERRIDE_SET = 'feature_flag_override_set',
   FEATURE_FLAG_OVERRIDE_REMOVED = 'feature_flag_override_removed',
   ADMIN_SESSION_FORCE_TERMINATED = 'admin_session_force_terminated',
+  ADMIN_LOGIN = 'admin_login',
 }
 
 export enum ActorType {
