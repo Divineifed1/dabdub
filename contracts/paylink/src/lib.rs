@@ -1,6 +1,6 @@
 #![no_std]
 
-use soroban_sdk::{contract, contracterror, contractimpl, contracttype, Env, String, Symbol};
+use soroban_sdk::{contract, contracterror, contractimpl, contracttype, Address, Env, String, Symbol};
 
 /// Extra ledgers beyond `ttl_ledgers` so persistent PayLink data remains readable until
 /// after the logical expiry ledger (archival buffer).
@@ -11,6 +11,8 @@ const PAYLINK_TTL_BUFFER_LEDGERS: u32 = 16_384;
 pub enum DataKey {
     Creator(String),
     PayLink(String),
+    Admin,
+    StakeBalance(String),
 }
 
 #[contracttype]
@@ -43,10 +45,55 @@ pub struct PayLinkContract;
 
 #[contractimpl]
 impl PayLinkContract {
+    /// One-time admin initialisation. Panics if already set.
+    pub fn set_admin(env: Env, admin: Address) {
+        if env.storage().instance().has(&DataKey::Admin) {
+            panic!("admin already set");
+        }
+        env.storage().instance().set(&DataKey::Admin, &admin);
+    }
+
     /// Marks `username` as an existing creator so `create_paylink` may succeed.
     /// Intended to be invoked from the same onboarding flow that provisions profiles on-chain.
     pub fn register_creator(env: Env, username: String) {
         env.storage().persistent().set(&DataKey::Creator(username), &true);
+    }
+
+    /// Credits yield to a staker's balance. Admin-only; does NOT check the paused flag.
+    pub fn credit_yield(
+        env: Env,
+        username: String,
+        amount: i128,
+    ) -> Result<(), Error> {
+        let admin: Address = env
+            .storage()
+            .instance()
+            .get(&DataKey::Admin)
+            .ok_or(Error::Unauthorized)?;
+        admin.require_auth();
+
+        if amount <= 0 {
+            return Err(Error::InvalidAmount);
+        }
+
+        if !env.storage().persistent().has(&DataKey::Creator(username.clone())) {
+            return Err(Error::UserNotFound);
+        }
+
+        let stake_key = DataKey::StakeBalance(username.clone());
+        let current: i128 = env.storage().persistent().get(&stake_key).unwrap_or(0);
+        let new_balance = current + amount;
+        env.storage().persistent().set(&stake_key, &new_balance);
+        env.storage()
+            .persistent()
+            .extend_ttl(&stake_key, PAYLINK_TTL_BUFFER_LEDGERS, PAYLINK_TTL_BUFFER_LEDGERS);
+
+        env.events().publish(
+            (Symbol::new(&env, "yield_credited"),),
+            (username, amount, new_balance, env.ledger().sequence()),
+        );
+
+        Ok(())
     }
 
     pub fn create_paylink(
@@ -148,7 +195,7 @@ impl PayLinkContract {
 #[cfg(test)]
 mod test {
     use super::*;
-    use soroban_sdk::testutils::Ledger;
+    use soroban_sdk::testutils::{Address as _, Ledger};
 
     #[test]
     fn create_paylink_persists_paylink_data() {
