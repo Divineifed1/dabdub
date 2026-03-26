@@ -8,6 +8,7 @@ import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { UploadModule } from './uploads/upload.module';
 import { WsModule } from './ws/ws.module';
 import { VirtualAccountModule } from './virtual-account/virtual-account.module';
 import { RatesModule } from './rates/rates.module';
@@ -53,7 +54,10 @@ import { TransactionsModule } from './transactions/transactions.module';
     // 5. Auth — register/login/refresh/logout + global JWT guard.
     AuthModule,
 
-    // 6. WebSockets — Socket.io real-time gateway.
+    // 6. File uploads — presign + confirm via Cloudflare R2.
+    UploadModule,
+
+    // 7. WebSockets — Socket.io real-time gateway.
     WsModule,
 
     // 7. Virtual Accounts — Flutterwave integration for NGN deposits.
@@ -80,4 +84,3 @@ import { TransactionsModule } from './transactions/transactions.module';
   ],
 })
 export class AppModule {}
-
