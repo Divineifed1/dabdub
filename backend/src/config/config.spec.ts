@@ -40,6 +40,13 @@ const VALID_ENV: NodeJS.ProcessEnv = {
   R2_ACCESS_KEY_ID: 'r2-access-key',
   R2_SECRET_ACCESS_KEY: 'r2-secret-key',
   R2_BUCKET_NAME: 'my-bucket',
+
+  FLUTTERWAVE_SECRET_KEY: 'flutterwave-secret-key',
+  FLUTTERWAVE_WEBHOOK_SECRET: 'flutterwave-webhook-secret',
+  FLUTTERWAVE_BASE_URL: 'https://api.flutterwave.com',
+
+  PAYSTACK_SECRET_KEY: 'paystack-secret-key',
+  PAYSTACK_BASE_URL: 'https://api.paystack.co',
 };
 
 function applyEnv(overrides: NodeJS.ProcessEnv = {}): void {

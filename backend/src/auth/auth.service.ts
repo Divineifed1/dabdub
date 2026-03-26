@@ -11,9 +11,10 @@ import type { ConfigType } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { jwtConfig } from '../config/jwt.config';
-import { User } from '../users/entities/user.entity';
+import { User, UserRole } from '../users/entities/user.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { Session } from './entities/session.entity';
+import { CacheService } from '../cache/cache.service';
 import type { RegisterDto } from './dto/register.dto';
 import type { LoginDto } from './dto/login.dto';
 import type { TokenResponseDto } from './dto/token-response.dto';
@@ -22,6 +23,7 @@ export interface JwtPayload {
   sub: string;
   username: string;
   role: 'user' | 'merchant' | 'admin' | 'super_admin';
+  role: 'admin' | 'merchant' | 'user';
   sessionId: string;
 }
 
@@ -41,6 +43,8 @@ export class AuthService {
 
     @Inject(jwtConfig.KEY)
     private readonly jwt: ConfigType<typeof jwtConfig>,
+
+    private readonly cacheService: CacheService,
   ) {}
 
   // ── Register ────────────────────────────────────────────────────
@@ -96,6 +100,7 @@ export class AuthService {
     }
 
     const sessionId = crypto.randomUUID();
+    await this.cacheService.trackActiveUser(user.id);
     return this.issueTokens(user, sessionId, ipAddress, deviceInfo);
   }
 
@@ -153,6 +158,11 @@ export class AuthService {
     const role =
       (user as any).role ??
       (user.isAdmin ? ('admin' as const) : ('user' as const));
+    const role: JwtPayload['role'] = user.isAdmin
+      ? 'admin'
+      : user.role === UserRole.MERCHANT
+        ? 'merchant'
+        : 'user';
     const payload: JwtPayload = {
       sub: user.id,
       username: user.username,
