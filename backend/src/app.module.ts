@@ -5,7 +5,6 @@ import { ConfigType } from '@nestjs/config';
 import { BullModule } from '@nestjs/bull';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AppConfigModule, appConfig, redisConfig } from './config';
-import { CacheModule } from './cache/cache.module';
 import { EmailModule } from './email/email.module';
 import { RatesModule } from './rates/rates.module';
 import { DatabaseModule } from './database/database.module';
@@ -26,6 +25,7 @@ import { UsersModule } from './users/users.module';
 import { BankAccountsModule } from './bank-accounts/bank-accounts.module';
 import { PayLinkModule } from './paylink/paylink.module';
 import { AdminModule } from './admin/admin.module';
+import { SmsModule } from './sms/sms.module';
 
 @Module({
   imports: [
@@ -72,7 +72,7 @@ import { AdminModule } from './admin/admin.module';
     // 7. Rates — USDC/NGN live rates with Redis cache + BullMQ polling.
     RatesModule,
 
-    // 8. Auth — register/login/refresh/logout + global JWT guard. — register/login/refresh/logout + global JWT guard.
+    // 8. Auth — register/login/refresh/logout + global JWT guard.
     AuthModule,
 
     // 6. File uploads — presign + confirm via Cloudflare R2.
@@ -91,16 +91,18 @@ import { AdminModule } from './admin/admin.module';
     RbacModule,
     MerchantsModule,
 
+    MerchantsModule,
     UsersModule,
-
     BankAccountsModule,
-
     PayLinkModule,
+    AdminModule,
+
+    // 10. SMS — OTP + transaction alerts via Termii + BullMQ.
+    SmsModule,
 
     AdminModule,
   ],
   providers: [
-    // Global guard: every route requires a valid JWT unless decorated @Public().
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
@@ -116,4 +118,3 @@ export class AppModule implements NestModule {
     consumer.apply(CorrelationIdMiddleware).forRoutes('*');
   }
 }
-
