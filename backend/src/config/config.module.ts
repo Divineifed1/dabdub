@@ -9,6 +9,7 @@ import { stellarConfig } from './stellar.config';
 import { zeptoConfig } from './zepto.config';
 import { r2Config } from './r2.config';
 import { flutterwaveConfig } from './flutterwave.config';
+import { paystackConfig } from './paystack.config';
 
 /**
  * Combined Joi validation schema for all environment variables.
@@ -115,13 +116,31 @@ const validationSchema = Joi.object({
   FLUTTERWAVE_BASE_URL: Joi.string()
     .uri()
     .default('https://api.flutterwave.com'),
+
+  // ── Paystack ──────────────────────────────────────────────────────────────
+  PAYSTACK_SECRET_KEY: Joi.string()
+    .required()
+    .messages({ 'any.required': 'PAYSTACK_SECRET_KEY is required' }),
+  PAYSTACK_BASE_URL: Joi.string()
+    .uri()
+    .default('https://api.paystack.co'),
 });
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, redisConfig, jwtConfig, stellarConfig, zeptoConfig, r2Config, flutterwaveConfig],
+      load: [
+        appConfig,
+        databaseConfig,
+        redisConfig,
+        jwtConfig,
+        stellarConfig,
+        zeptoConfig,
+        r2Config,
+        flutterwaveConfig,
+        paystackConfig,
+      ],
       validationSchema,
       validationOptions: { abortEarly: false },
     }),
