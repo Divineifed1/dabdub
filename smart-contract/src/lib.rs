@@ -1,6 +1,8 @@
 #![no_std]
 
-use soroban_sdk::{contract, contracterror, contractimpl, contracttype, Address, Env, String};
+use soroban_sdk::{
+    contract, contracterror, contractimpl, contracttype, symbol_short, Address, Env, String,
+};
 
 const BALANCE_TTL_THRESHOLD: u32 = 518_400;
 const BALANCE_TTL_EXTEND_TO: u32 = 1_036_800;
@@ -12,6 +14,11 @@ const PAYLINK_TTL_EXTEND_TO: u32 = 207_360;
 #[contracttype]
 #[derive(Clone)]
 pub enum DataKey {
+    Admin,
+    UsdcToken,
+    FeeRateBps,
+    FeeTreasury,
+    Paused,
     UsernameToAddr(String),
     AddrToUsername(Address),
     Balance(String),
@@ -24,6 +31,8 @@ pub enum DataKey {
 #[repr(u32)]
 pub enum ContractError {
     UserNotFound = 1,
+    AlreadyInitialized = 2,
+    FeeTooHigh = 3,
 }
 
 #[contract]
@@ -31,6 +40,38 @@ pub struct UserLookupContract;
 
 #[contractimpl]
 impl UserLookupContract {
+    pub fn initialize(
+        env: Env,
+        admin: Address,
+        usdc_token: Address,
+        fee_rate_bps: i128,
+        fee_treasury: Address,
+    ) -> Result<(), ContractError> {
+        if env.storage().instance().has(&DataKey::Admin) {
+            return Err(ContractError::AlreadyInitialized);
+        }
+        if !(0..=500).contains(&fee_rate_bps) {
+            return Err(ContractError::FeeTooHigh);
+        }
+
+        env.storage().instance().set(&DataKey::Admin, &admin);
+        env.storage()
+            .instance()
+            .set(&DataKey::UsdcToken, &usdc_token);
+        env.storage()
+            .instance()
+            .set(&DataKey::FeeRateBps, &fee_rate_bps);
+        env.storage()
+            .instance()
+            .set(&DataKey::FeeTreasury, &fee_treasury);
+        env.storage().instance().set(&DataKey::Paused, &false);
+
+        env.events()
+            .publish((symbol_short!("inited"), admin), fee_rate_bps);
+
+        Ok(())
+    }
+
     pub fn get_address(env: Env, username: String) -> Result<Address, ContractError> {
         let key = DataKey::UsernameToAddr(username.clone());
         let address: Address = env
@@ -338,5 +379,77 @@ mod test {
 
         assert!(after_ttl >= before_ttl);
         assert!(after_ttl >= PAYLINK_TTL_EXTEND_TO.saturating_sub(1));
+    }
+
+    #[test]
+    fn initialize_writes_instance_keys_and_rejects_second_call() {
+        let env = Env::default();
+        let contract_id = env.register(UserLookupContract, ());
+
+        let admin = Address::generate(&env);
+        let usdc_token = Address::generate(&env);
+        let fee_treasury = Address::generate(&env);
+        let fee_rate_bps: i128 = 25;
+
+        let first = env.as_contract(&contract_id, || {
+            UserLookupContract::initialize(
+                env.clone(),
+                admin.clone(),
+                usdc_token.clone(),
+                fee_rate_bps,
+                fee_treasury.clone(),
+            )
+        });
+        assert_eq!(first, Ok(()));
+
+        env.as_contract(&contract_id, || {
+            let stored_admin: Option<Address> = env.storage().instance().get(&DataKey::Admin);
+            let stored_usdc_token: Option<Address> =
+                env.storage().instance().get(&DataKey::UsdcToken);
+            let stored_fee_rate_bps: Option<i128> =
+                env.storage().instance().get(&DataKey::FeeRateBps);
+            let stored_fee_treasury: Option<Address> =
+                env.storage().instance().get(&DataKey::FeeTreasury);
+            let stored_paused: Option<bool> = env.storage().instance().get(&DataKey::Paused);
+
+            assert_eq!(stored_admin, Some(admin.clone()));
+            assert_eq!(stored_usdc_token, Some(usdc_token.clone()));
+            assert_eq!(stored_fee_rate_bps, Some(fee_rate_bps));
+            assert_eq!(stored_fee_treasury, Some(fee_treasury.clone()));
+            assert_eq!(stored_paused, Some(false));
+        });
+
+        let second = env.as_contract(&contract_id, || {
+            UserLookupContract::initialize(
+                env.clone(),
+                admin.clone(),
+                usdc_token.clone(),
+                fee_rate_bps,
+                fee_treasury.clone(),
+            )
+        });
+        assert_eq!(second, Err(ContractError::AlreadyInitialized));
+    }
+
+    #[test]
+    fn initialize_rejects_fee_rate_above_500() {
+        let env = Env::default();
+        let contract_id = env.register(UserLookupContract, ());
+
+        let result = env.as_contract(&contract_id, || {
+            UserLookupContract::initialize(
+                env.clone(),
+                Address::generate(&env),
+                Address::generate(&env),
+                501,
+                Address::generate(&env),
+            )
+        });
+        assert_eq!(result, Err(ContractError::FeeTooHigh));
+
+        env.as_contract(&contract_id, || {
+            let stored_admin: Option<Address> = env.storage().instance().get(&DataKey::Admin);
+            assert_eq!(stored_admin, None);
+        });
     }
 }
