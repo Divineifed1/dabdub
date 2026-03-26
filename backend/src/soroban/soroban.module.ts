@@ -6,3 +6,4 @@ import { SorobanService } from './soroban.service';
   exports: [SorobanService],
 })
 export class SorobanModule {}
+export class SorobanModule {}
