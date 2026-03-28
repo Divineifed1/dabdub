@@ -55,6 +55,7 @@ import { WaitlistModule } from './waitlist/waitlist.module';
 import { KycModule } from './kyc/kyc.module';
 import { ReportsModule } from './reports/reports.module';
 import { WalletsModule } from './wallets/wallets.module';
+import { BlockchainTransactionsModule } from './blockchain-transactions/blockchain-transactions.module';
 import { ApiVersionModule } from './api-version/api-version.module';
 import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers.interceptor';
 import { CronModule } from './cron/cron.module';
@@ -182,6 +183,9 @@ import { ComplianceModule } from './compliance/compliance.module';
     // Transactions — activity history with cursor-based pagination.
     // Passkey/WebAuthn authentication.
     PasskeyModule,
+
+    // Blockchain transactions — on-chain audit trail.
+    BlockchainTransactionsModule,
 
     // Transactions — activity history with cursor-based pagination.
     TransactionsModule,
