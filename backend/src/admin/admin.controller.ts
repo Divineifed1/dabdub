@@ -25,6 +25,7 @@ import { Request } from 'express';
 import { AuditInterceptor, Audit } from '../audit/audit.interceptor';
 import { ReferralAnalyticsService } from '../referrals/referral-analytics.service';
 import { FunnelStatsDto, TopReferrersDto, CohortComparisonDto, RewardSpendDto, UserReferralStatsDto } from '../referrals/dto/referral-analytics.dto';
+import { GeoService } from '../geo/geo.service';
 
 @ApiTags('admin')
 @ApiBearerAuth()
@@ -36,6 +37,7 @@ export class AdminController {
     private readonly adminService: AdminService,
     private readonly receiptService: ReceiptService,
     private readonly referralAnalyticsService: ReferralAnalyticsService,
+    private readonly geoService: GeoService,
   ) {}
 
   @Get('users')
@@ -119,5 +121,14 @@ export class AdminController {
   @ApiOperation({ summary: 'Generate receipt for any transaction (admin)' })
   async getTransactionReceipt(@Param('id') id: string) {
     return this.receiptService.generateTransactionReceiptAdmin(id);
+  }
+
+  @Get('geo/stats')
+  @Roles(AdminRole.ADMIN, AdminRole.SUPERADMIN)
+  @ApiOperation({
+    summary: 'Geo-blocked request counts by country in the last 24 hours',
+  })
+  async getGeoStats() {
+    return this.geoService.getBlockedCountryStatsLast24h();
   }
 }
