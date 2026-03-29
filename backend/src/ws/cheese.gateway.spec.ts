@@ -168,4 +168,15 @@ describe('CheeseGateway', () => {
       expect(mockServer.to).not.toHaveBeenCalled();
     });
   });
+
+  describe('emitToAll', () => {
+    it('broadcasts to all connected sockets when server is ready', async () => {
+      const emit = jest.fn();
+      (gateway as any).server = { emit };
+
+      await gateway.emitToAll('system_announcement', { id: 'a1' });
+
+      expect(emit).toHaveBeenCalledWith('system_announcement', { id: 'a1' });
+    });
+  });
 });

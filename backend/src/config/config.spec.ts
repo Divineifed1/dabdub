@@ -5,6 +5,7 @@ import type { AppConfig } from './app.config';
 import type { DatabaseConfig } from './database.config';
 import type { RedisConfig } from './redis.config';
 import type { JwtConfig } from './jwt.config';
+import type { QueueConfig } from './queue.config';
 
 /** Minimal valid env that satisfies every required field. */
 const VALID_ENV: NodeJS.ProcessEnv = {
@@ -23,7 +24,10 @@ const VALID_ENV: NodeJS.ProcessEnv = {
 
   REDIS_HOST: 'localhost',
   REDIS_PORT: '6379',
+  BULL_BOARD_USERNAME: 'queue-admin',
+  BULL_BOARD_PASSWORD: 'queue-password',
 
+  STELLAR_NETWORK: 'testnet',
   JWT_ACCESS_SECRET: 'access-secret-that-is-at-least-32-chars!!',
   JWT_REFRESH_SECRET: 'refresh-secret-that-is-at-least-32-chars!',
   JWT_ACCESS_EXPIRY: '15m',
@@ -111,6 +115,15 @@ describe('AppConfigModule', () => {
     ).toBeUndefined();
   });
 
+  it('returns correct typed QueueConfig values', () => {
+    expect(
+      config.get<QueueConfig['bullBoardUsername']>('queue.bullBoardUsername'),
+    ).toBe('queue-admin');
+    expect(
+      config.get<QueueConfig['bullBoardPassword']>('queue.bullBoardPassword'),
+    ).toBe('queue-password');
+  });
+
   it('exposes optional REDIS_PASSWORD when provided', async () => {
     clearEnv();
     applyEnv({ REDIS_PASSWORD: 'secret' });
@@ -133,6 +146,7 @@ describe('AppConfigModule', () => {
   });
 
   it('returns correct Stellar, Zepto, and R2 config values', () => {
+    expect(config.get<string>('stellar.network')).toBe('testnet');
     expect(config.get<string>('stellar.rpcUrl')).toBe(
       'https://soroban-testnet.stellar.org',
     );
@@ -187,6 +201,15 @@ describe('AppConfigModule', () => {
   it('throws when STELLAR_RPC_URL is not a valid URI', async () => {
     clearEnv();
     applyEnv({ STELLAR_RPC_URL: 'not-a-url' });
+
+    await expect(
+      Test.createTestingModule({ imports: [AppConfigModule] }).compile(),
+    ).rejects.toThrow();
+  });
+
+  it('throws when STELLAR_NETWORK is invalid', async () => {
+    clearEnv();
+    applyEnv({ STELLAR_NETWORK: 'invalid-network' });
 
     await expect(
       Test.createTestingModule({ imports: [AppConfigModule] }).compile(),

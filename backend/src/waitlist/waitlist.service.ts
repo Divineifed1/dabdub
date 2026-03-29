@@ -18,6 +18,7 @@ import { RankResponseDto } from './dto/rank-response.dto';
 import { LeaderboardEntryDto } from './dto/leaderboard-entry.dto';
 import { EmailService } from '../email/email.service';
 import { CheeseGateway } from '../ws/cheese.gateway';
+import { WaitlistFraudService, WaitlistFraudException } from './waitlist-fraud.service';
 
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 8);
 
@@ -52,31 +53,26 @@ export class WaitlistService {
     private readonly redis: Redis,
     private readonly emailService: EmailService,
     private readonly gateway: CheeseGateway,
+    private readonly fraudService: WaitlistFraudService,
   ) {
     this.frontendUrl = process.env['FRONTEND_URL'] ?? 'https://app.cheese.finance';
   }
 
   async join(dto: JoinWaitlistDto, ipAddress: string, fingerprint?: string): Promise<WaitlistEntry> {
-    // 1. Disposable email check
-    const domain = dto.email.split('@')[1]?.toLowerCase();
-    if (domain && DISPOSABLE_DOMAINS.has(domain)) {
-      throw new BadRequestException('Disposable email addresses are not allowed');
-    }
-
-    // 2. Duplicate email check
-    const existing = await this.repo.findOne({ where: { email: dto.email } });
-    if (existing) {
-      throw new ConflictException('This email is already on the waitlist');
-    }
-
-    // 3. IP rate limit — max 3 per IP per day
-    const ipKey = IP_RATE_KEY(ipAddress);
-    const ipCount = await this.redis.incr(ipKey);
-    if (ipCount === 1) {
-      await this.redis.expire(ipKey, 86400); // 24h TTL
-    }
-    if (ipCount > MAX_PER_IP) {
-      throw new TooManyRequestsException('Too many signups from this IP address');
+    // Run fraud detection checks
+    try {
+      await this.fraudService.check(dto, ipAddress, fingerprint);
+    } catch (error) {
+      if (error instanceof WaitlistFraudException) {
+        if (error.statusCode === 409) {
+          throw new ConflictException(error.reason);
+        } else if (error.statusCode === 429) {
+          throw new TooManyRequestsException(error.reason);
+        } else {
+          throw new BadRequestException(error.reason);
+        }
+      }
+      throw error;
     }
 
     // 4. Validate referral code if provided
@@ -106,11 +102,19 @@ export class WaitlistService {
     });
     await this.repo.save(entry);
 
-    // 7. Award referrer bonus
+    // 7. Award referrer bonus (check for self-referral abuse)
     if (referrer) {
-      await this.repo.increment({ id: referrer.id }, 'points', REFERRAL_BONUS);
-      referrer.points += REFERRAL_BONUS;
-      await this.redis.zadd(LEADERBOARD_KEY, referrer.points, referrer.referralCode);
+      // Check if this was flagged as self-referral abuse
+      const fraudLogs = await this.fraudService.getFraudLogs(1, 1, 'REFERRAL_SELF_ABUSE');
+      const isSelfReferralAbuse = fraudLogs.data.some(log => 
+        log.email === dto.email && log.ip === ipAddress
+      );
+      
+      if (!isSelfReferralAbuse) {
+        await this.repo.increment({ id: referrer.id }, 'points', REFERRAL_BONUS);
+        referrer.points += REFERRAL_BONUS;
+        await this.redis.zadd(LEADERBOARD_KEY, referrer.points, referrer.referralCode);
+      }
     }
 
     // 8. Add to Redis leaderboard sorted set

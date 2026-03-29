@@ -21,6 +21,9 @@ export const WS_EVENTS = {
   NOTIFICATION_NEW: 'notification_new',
   RANK_CHANGED: 'rank_changed',
   SYSTEM_MESSAGE: 'system_message',
+  SYSTEM_MAINTENANCE_START: 'system_maintenance_start',
+  SYSTEM_MAINTENANCE_END: 'system_maintenance_end',
+  SYSTEM_ANNOUNCEMENT: 'system_announcement',
 } as const;
 
 const REDIS_WS_PREFIX = 'ws:connections:';
@@ -57,7 +60,10 @@ export class CheeseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   async handleConnection(client: Socket): Promise<void> {
-    const token: string | undefined = client.handshake.auth?.token;
+    const handshakeAuth = client.handshake.auth as
+      | { token?: string }
+      | undefined;
+    const token: string | undefined = handshakeAuth?.token;
 
     if (!token) {
       client.disconnect();
@@ -101,6 +107,30 @@ export class CheeseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const sockets = await this.redis.hkeys(`${REDIS_WS_PREFIX}${userId}`);
     if (sockets.length === 0) return;
     this.server.to(`user:${userId}`).emit(event, data);
+  }
+
+  emitToAdmins(event: string, data: unknown): Promise<void> {
+    if (!this.server) {
+      this.logger.warn(
+        'WebSocket server is not ready; skipping admin broadcast',
+      );
+      return Promise.resolve();
+    }
+
+    this.server.to('admin').emit(event, data);
+    return Promise.resolve();
+  }
+
+  emitToAll(event: string, data: unknown): Promise<void> {
+    if (!this.server) {
+      this.logger.warn(
+        'WebSocket server is not ready; skipping global broadcast',
+      );
+      return Promise.resolve();
+    }
+
+    this.server.emit(event, data);
+    return Promise.resolve();
   }
 
   async getStats(): Promise<{ connectedUsers: number; totalSockets: number }> {

@@ -97,7 +97,7 @@ export class QrService {
     return `${WEB_FALLBACK_BASE}/${encodeURIComponent(username)}`;
   }
 
-  private async renderQr(content: string): Promise<string> {
+async renderQr(content: string): Promise<string> {
     return QRCode.toDataURL(content, {
       errorCorrectionLevel: 'M',
       width: QR_WIDTH,
@@ -108,7 +108,7 @@ export class QrService {
   /**
    * SHA-256 hash of the params object → stable, collision-resistant cache key.
    */
-  private buildCacheKey(params: Record<string, string | undefined>): string {
+  buildCacheKey(params: Record<string, string | undefined>): string {
     const normalized = Object.keys(params)
       .sort()
       .reduce<Record<string, string>>((acc, k) => {
@@ -123,4 +123,39 @@ export class QrService {
 
     return `qr:${hash}`;
   }
-}
+
+  /**
+   * Generate merchant POS QR: persistent for no-amount, one-time with amount/note
+   * Cache: pos:qr:{merchantId} TTL 86400 (persistent), or hashed for one-time
+   */
+  async generatePosQr(
+    username: string,
+    merchantId: string,
+    amount?: string,
+    note?: string,
+  ): Promise<{ qrDataUrl: string; paymentUrl: string }> {
+    const params = new URLSearchParams({ to: username });
+    if (amount) params.set('amount', amount);
+    if (note) params.set('note', note);
+
+    const paymentUrl = `${DEEP_LINK_SCHEME}pay?${params.toString()}`;
+
+    const isPersistent = !amount && !note;
+    const cacheKey = isPersistent 
+      ? `pos:qr:${merchantId}` 
+      : this.buildCacheKey({ type: 'pos', merchantId, amount, note });
+
+    const ttl = isPersistent ? 86400 : CACHE_TTL_SECONDS;
+
+    const cached = await this.redis.get(cacheKey);
+    if (cached) {
+      this.logger.debug(`POS QR cache hit: ${cacheKey}`);
+      return { qrDataUrl: cached, paymentUrl };
+    }
+
+    const qrDataUrl = await this.renderQr(paymentUrl);
+    await this.redis.set(cacheKey, qrDataUrl, 'EX', ttl);
+
+    this.logger.debug(`POS QR generated & cached: ${cacheKey}`);
+    return { qrDataUrl, paymentUrl };
+  }

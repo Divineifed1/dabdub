@@ -1,4 +1,4 @@
-import { Controller, Get, Request, UseGuards, Version } from '@nestjs/common';
+import { Controller, Get, Request, Query, UseGuards, Version, BadRequestException } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -17,7 +17,10 @@ import { ReferralService } from './referral.service';
 @UseGuards(JwtGuard)
 @Controller({ path: 'referrals', version: '1' })
 export class ReferralsController {
-  constructor(private readonly referralService: ReferralService) {}
+  constructor(
+    private readonly referralService: ReferralService,
+    private readonly analyticsService: ReferralAnalyticsService,
+  ) {}
 
   @Version('1')
   @Get('code')
@@ -41,5 +44,20 @@ export class ReferralsController {
   })
   getStats(@Request() req: any): Promise<ReferralStatsDto> {
     return this.referralService.getStats(req.user.id);
+  }
+
+  @Version('1')
+  @Get('track')
+  @ApiOperation({ summary: 'Track invite click (public)' })
+  async trackClick(@Query('ref') refCode: string) {
+    if (!refCode) {
+      throw new BadRequestException('ref code required');
+    }
+    await this.referralService.assertReferralCodeExists(refCode); // validate
+    await this.analyticsService.incrementClick(refCode);
+    const registerUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/register?ref=${refCode}`;
+    // Redirect
+    // Since NestJS API, return redirect URL for frontend or use res.redirect if extend
+    return { redirectTo: registerUrl };
   }
 }

@@ -118,31 +118,41 @@ export class MerchantsService {
     return this.merchantRepo.save(merchant);
   }
 
-  async getPublicByUsername(username: string): Promise<{
-    businessName: string;
-    logoKey: string | null;
-    isVerified: boolean;
-  }> {
-    const merchant = await this.merchantRepo
+async getPublicByUsername(username: string): Promise<MerchantPublicProfileDto> {
+    const result = await this.merchantRepo
       .createQueryBuilder('merchant')
       .innerJoin(User, 'user', 'user.id = merchant.user_id')
       .where('user.username = :username', { username })
       .select([
-        'merchant.businessName AS "businessName"',
-        'merchant.logoKey AS "logoKey"',
-        'merchant.isVerified AS "isVerified"',
+        'merchant.businessName',
+        'merchant.logoKey',
+        'merchant.isVerified',
+        'user.username',
+        'user.tier',
       ])
       .getRawOne<{
         businessName: string;
         logoKey: string | null;
         isVerified: boolean;
+        username: string;
+        tier: string;
       }>();
 
-    if (!merchant) {
+    if (!result) {
       throw new NotFoundException('Merchant not found');
     }
 
-    return merchant;
+    const logoUrl = result.logoKey 
+      ? `https://pub-r2.example.com/${result.logoKey}` // TODO: Use uploads public URL service
+      : null;
+
+    return {
+      businessName: result.businessName,
+      logoUrl,
+      username: result.username!,
+      isVerified: result.isVerified,
+      tier: result.tier as any, // TierName
+    };
   }
 
   async verifyMerchant(merchantId: string): Promise<Merchant> {

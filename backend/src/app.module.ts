@@ -13,9 +13,13 @@ import { HealthModule } from './health/health.module';
 import { SorobanModule } from './soroban/soroban.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { StellarModule } from './stellar/stellar.module';
 import { UploadModule } from './uploads/upload.module';
 import { WsModule } from './ws/ws.module';
+import { OnRampModule } from './onramp/onramp.module';
+import { QueueModule } from './queue/queue.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { AnnouncementsModule } from './announcements/announcements.module';
 import { LoggingModule } from './logging/logging.module';
 import { CorrelationIdMiddleware } from './logging/correlation-id.middleware';
 import { HttpLoggingInterceptor } from './logging/http-logging.interceptor';
@@ -28,6 +32,7 @@ import { BankAccountsModule } from './bank-accounts/bank-accounts.module';
 import { PayLinkModule } from './paylink/paylink.module';
 import { ReceiveModule } from './receive/receive.module';
 import { VirtualAccountModule } from './virtual-account/virtual-account.module';
+import { VirtualCardsModule } from './virtual-cards/virtual-cards.module';
 import { AuditModule } from './audit/audit.module';
 import { AppConfigModule as RuntimeConfigModule } from './app-config/app-config.module';
 import { MaintenanceModeMiddleware } from './app-config/middleware/maintenance-mode.middleware';
@@ -39,15 +44,38 @@ import { TransfersModule } from './transfers/transfers.module';
 import { WithdrawalsModule } from './withdrawals/withdrawals.module';
 import { PasskeyModule } from './passkey/passkey.module';
 import { SecurityModule } from './security/security.module';
+import { SandboxModule } from './sandbox/sandbox.module';
+import { MaintenanceModule } from './maintenance/maintenance.module';
+import { MaintenanceWindowMiddleware } from './maintenance/middleware/maintenance-window.middleware';
+
+// TODO: Enable Sentry when @sentry/nestjs module is compatible
+// import { SentryModule } from '@sentry/nestjs';
+import { AlertModule } from './alert/alert.module';
+import { GroupsModule } from './groups/groups.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { PushModule } from './push/push.module';
 import { WaitlistModule } from './waitlist/waitlist.module';
 import { KycModule } from './kyc/kyc.module';
 import { ReportsModule } from './reports/reports.module';
+import { WalletsModule } from './wallets/wallets.module';
+import { BlockchainTransactionsModule } from './blockchain-transactions/blockchain-transactions.module';
 import { ApiVersionModule } from './api-version/api-version.module';
 import { OffRampModule } from './offramp/offramp.module';
 import { OtpModule } from './otp/otp.module';
 import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers.interceptor';
+import { CronModule } from './cron/cron.module';
+import { ActivityModule } from './activity/activity.module';
+import { BalanceModule } from './balance/balance.module';
+import { SentryModule as SentryUserContextModule } from './sentry/sentry.module';
+import { SentryUserMiddleware } from './sentry/sentry-user.middleware';
+import { OtpModule } from './otp/otp.module';
+import { PwaModule } from './pwa/pwa.module';
+import { SecurityHeadersMiddleware } from './security/security-headers.middleware';
+import { ComplianceModule } from './compliance/compliance.module';
+import { DisputesModule } from './disputes/disputes.module';
+import { UsernameModule } from './username/username.module';
+import { SplitsModule } from './splits/splits.module';
+import { FeedbackModule } from './feedback/feedback.module';
 
 @Module({
   imports: [
@@ -88,16 +116,26 @@ import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers
       }),
     }),
 
+    QueueModule,
+
     HealthModule,
+    OnRampModule,
     ApiVersionModule,
     SorobanModule,
+    CronModule,
 
+    StellarModule,
+
+    // 5. Auth — register/login/refresh/logout + global JWT guard.
     // 6. Email — async transactional delivery via ZeptoMail + BullMQ.
     EmailModule,
 
     // 7. Rates — USDC/NGN live rates with Redis cache + BullMQ polling.
     RatesModule,
 
+    StellarModule,
+
+    // 5. Auth — register/login/refresh/logout + global JWT guard.
     // 8. Auth — register/login/refresh/logout + global JWT guard.
     AuthModule,
 
@@ -109,6 +147,7 @@ import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers
 
     // Notifications — entity + API + realtime delivery.
     NotificationsModule,
+    AnnouncementsModule,
 
     // Webhooks — subscriptions + signed deliveries + retries.
     WebhooksModule,
@@ -122,8 +161,13 @@ import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers
     TransfersModule,
     WithdrawalsModule,
     SecurityModule,
+    SandboxModule,
+    MaintenanceModule,
+    AlertModule,
+    GroupsModule,
     BankAccountsModule,
     VirtualAccountModule,
+    VirtualCardsModule,
     PayLinkModule,
     ReceiveModule,
 
@@ -132,7 +176,7 @@ import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers
     // Runtime feature flags + maintenance mode.
     RuntimeConfigModule,
 
-    AdminModule,
+    AdminModule, // Includes AnalyticsModule
 
     // SMS — OTP + transaction alerts via Termii + BullMQ.
     SmsModule,
@@ -140,6 +184,7 @@ import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers
 
     // Push — Firebase Cloud Messaging device token management.
     PushModule,
+    PwaModule,
 
     // Earnings — yield dashboard, APY display, projections.
     EarningsModule,
@@ -149,6 +194,9 @@ import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers
     // Transactions — activity history with cursor-based pagination.
     // Passkey/WebAuthn authentication.
     PasskeyModule,
+
+    // Blockchain transactions — on-chain audit trail.
+    BlockchainTransactionsModule,
 
     // Transactions — activity history with cursor-based pagination.
     TransactionsModule,
@@ -164,7 +212,28 @@ import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers
 
     // Off-Ramp — USDC to NGN conversion and bank transfer.
     OffRampModule,
+    // Activity — chronological feed with cursor pagination, summary, and breakdown.
+    ActivityModule,
+    // Balance — unified balance aggregation with caching.
+    BalanceModule,
+    // Sentry user context module
+    SentryUserContextModule,
+    ComplianceModule,
+
+    // Wallets — Stellar keypair provisioning + balance sync.
+    WalletsModule,
+
+    // Disputes — transaction chargeback and reversal requests.
+    DisputesModule,
+    UsernameModule,
+
+
+    // Splits — split payment requests among multiple users.
+    SplitsModule,
+    FeedbackModule,
+
   ],
+
   providers: [
     {
       provide: APP_GUARD,
@@ -188,5 +257,8 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
     consumer.apply(CorrelationIdMiddleware).forRoutes('*');
     consumer.apply(MaintenanceModeMiddleware).forRoutes('*');
+    consumer.apply(MaintenanceWindowMiddleware).forRoutes('*');
+    consumer.apply(SentryUserMiddleware).forRoutes('*');
+    consumer.apply(SecurityHeadersMiddleware).forRoutes('*');
   }
 }

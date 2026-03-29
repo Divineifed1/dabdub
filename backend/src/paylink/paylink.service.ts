@@ -24,6 +24,7 @@ import { CreatePayLinkDto } from './dto/create-pay-link.dto';
 import { ListPayLinksQueryDto } from './dto/list-pay-links-query.dto';
 import { PayLinkPublicDto } from './dto/pay-link-public.dto';
 import { PayLink, PayLinkStatus } from './entities/pay-link.entity';
+import { BalanceService } from '../balance/balance.service';
 
 const DEFAULT_EXPIRES_HOURS = 72;
 const PAYLINK_TOKEN_SIZE = 10;
@@ -36,6 +37,10 @@ type TxHashCandidate = {
   txHash?: string;
   hash?: string;
   transactionHash?: string;
+};
+
+type CreatePayLinkOptions = {
+  sandbox?: boolean;
 };
 
 @Injectable()
@@ -57,6 +62,7 @@ export class PayLinkService {
     private readonly gateway: CheeseGateway,
     private readonly emailService: EmailService,
     private readonly notificationService: NotificationService,
+    private readonly balanceService: BalanceService,
   ) {}
 
   async countActiveReceiveLinks(creatorUserId: string): Promise<number> {
@@ -68,7 +74,11 @@ export class PayLinkService {
       .getCount();
   }
 
-  async create(creator: User, dto: CreatePayLinkDto): Promise<PayLink> {
+  async create(
+    creator: User,
+    dto: CreatePayLinkDto,
+    options: CreatePayLinkOptions = {},
+  ): Promise<PayLink> {
     if (dto.customSlug) {
       const existing = await this.payLinkRepo.findOne({
         where: { tokenId: dto.customSlug },
@@ -82,14 +92,17 @@ export class PayLinkService {
     const expiresInHours = dto.expiresInHours ?? DEFAULT_EXPIRES_HOURS;
     const expiresAt = new Date(Date.now() + expiresInHours * 60 * 60 * 1000);
 
-    const sorobanResult = await this.sorobanService.createPayLink(
-      creator.username,
-      tokenId,
-      dto.amount,
-      dto.note ?? '',
-    );
-
-    const createdTxHash = this.extractTxHash(sorobanResult);
+    const sandbox = options.sandbox === true;
+    const createdTxHash = sandbox
+      ? this.buildSandboxTxHash()
+      : this.extractTxHash(
+          await this.sorobanService.createPayLink(
+            creator.username,
+            tokenId,
+            dto.amount,
+            dto.note ?? '',
+          ),
+        );
 
     const entity = this.payLinkRepo.create({
       creatorUserId: creator.id,
@@ -101,6 +114,7 @@ export class PayLinkService {
       expiresAt,
       createdTxHash,
       paymentTxHash: null,
+      sandbox,
     });
 
     return this.payLinkRepo.save(entity);
@@ -109,6 +123,11 @@ export class PayLinkService {
   async getPublic(tokenId: string): Promise<PayLinkPublicDto> {
     const payLink = await this.payLinkRepo.findOne({ where: { tokenId } });
     if (!payLink) {
+      throw new NotFoundException('PayLink not found');
+    }
+
+    if (payLink.sandbox) {
+      // Sandbox links are not exposed on the public checkout route.
       throw new NotFoundException('PayLink not found');
     }
 
@@ -148,6 +167,11 @@ export class PayLinkService {
     }
     if (payLink.status === PayLinkStatus.CANCELLED) {
       throw new ConflictException('PayLink is cancelled');
+    }
+    if (payLink.sandbox) {
+      throw new ForbiddenException(
+        'Sandbox PayLink can only be paid via sandbox simulation',
+      );
     }
 
     const creator = await this.userRepo.findOne({
@@ -191,6 +215,10 @@ export class PayLinkService {
         description: `PayLink payment received from ${payer.username}`,
       }),
     );
+
+    // Invalidate balance cache for both users
+    await this.balanceService.invalidateCache(payer.id);
+    await this.balanceService.invalidateCache(creator.id);
 
     await this.gateway.emitToUser(creator.id, WS_EVENTS.PAYLINK_PAID, {
       tokenId,
@@ -346,5 +374,12 @@ export class PayLinkService {
       return maybe.txHash ?? maybe.hash ?? maybe.transactionHash ?? 'unknown';
     }
     return 'unknown';
+  }
+
+  private buildSandboxTxHash(): string {
+    return `sandbox_${customAlphabet(
+      '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+      16,
+    )()}`;
   }
 }
