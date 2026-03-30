@@ -3,6 +3,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { InjectQueue } from '@nestjs/bull';
@@ -10,11 +11,14 @@ import { Repository } from 'typeorm';
 import { Queue } from 'bull';
 import { Transfer, TransferStatus } from './entities/transfer.entity';
 import { CreateTransferDto } from './dto/create-transfer.dto';
+import { PreviewTransferResponseDto } from './dto/preview-transfer.dto';
 import { TransferQueryDto, TransferDirection } from './dto/transfer-query.dto';
 import { UsersService } from '../users/users.service';
 import { TierService } from '../tier-config/tier.service';
 import { FeeType } from '../fee-config/entities/fee-config.entity';
 import { FeesService } from '../fees/fees.service';
+import { P2pLimitService } from './p2p-limit.service';
+import { User } from '../users/entities/user.entity';
 
 export const TRANSFER_QUEUE = 'process-transfer';
 export const PROCESS_TRANSFER_JOB = 'process-transfer';
@@ -37,31 +41,80 @@ export class TransfersService {
     private readonly usersService: UsersService,
     private readonly tierService: TierService,
     private readonly feesService: FeesService,
+    private readonly p2pLimitService: P2pLimitService,
   ) {}
 
   // ── Create ────────────────────────────────────────────────────────────────
+
+  async preview(
+    fromUserId: string,
+    fromUsername: string,
+    dto: CreateTransferDto,
+  ): Promise<PreviewTransferResponseDto> {
+    const { toUser, amount } = await this.validateTransferRequest(
+      fromUsername,
+      dto,
+    );
+
+    await this.tierService.checkTransferLimit(fromUserId, amount);
+    const p2pLimits = await this.p2pLimitService.assertTransferAllowed(
+      fromUserId,
+      toUser.id,
+      amount,
+    );
+    const confirmation = await this.p2pLimitService.checkNewRecipientLimit(
+      fromUserId,
+      toUser.id,
+      amount,
+    );
+    const computedFee = await this.feesService.computeFee(
+      FeeType.TRANSFER,
+      dto.amount,
+    );
+
+    return {
+      toUserId: toUser.id,
+      toUsername: toUser.username,
+      amount: dto.amount,
+      fee: computedFee.fee,
+      netAmount: computedFee.net,
+      isP2p: p2pLimits.isP2p,
+      dailyP2pLimit: p2pLimits.dailyP2pLimit,
+      dailyP2pUsed: p2pLimits.dailyP2pUsed,
+      dailyP2pRemaining: p2pLimits.dailyP2pRemaining,
+      requiresConfirmation: confirmation.requiresConfirmation,
+      reason: confirmation.reason,
+    };
+  }
 
   async create(
     fromUserId: string,
     fromUsername: string,
     dto: CreateTransferDto,
   ): Promise<Transfer> {
-    if (dto.toUsername.toLowerCase() === fromUsername.toLowerCase()) {
-      throw new BadRequestException('Cannot transfer to yourself');
-    }
-
-    const toUser = await this.usersService.findByUsername(dto.toUsername);
-    if (!toUser) {
-      throw new NotFoundException(`User @${dto.toUsername} not found`);
-    }
-
-    const amount = parseFloat(dto.amount);
-    if (isNaN(amount) || amount <= 0) {
-      throw new BadRequestException('Invalid amount');
-    }
+    const { toUser, amount } = await this.validateTransferRequest(
+      fromUsername,
+      dto,
+    );
 
     // Tier limit check (throws TierLimitExceededException → 403 if exceeded)
     await this.tierService.checkTransferLimit(fromUserId, amount);
+    await this.p2pLimitService.assertTransferAllowed(
+      fromUserId,
+      toUser.id,
+      amount,
+    );
+    await this.p2pLimitService.checkNewRecipientLimit(
+      fromUserId,
+      toUser.id,
+      amount,
+    );
+    const velocity = await this.p2pLimitService.checkVelocity(fromUserId, 1);
+    if (velocity.isFrozen) {
+      throw new UnauthorizedException(
+        'Account frozen due to abnormal P2P transfer velocity',
+      );
+    }
 
     const computedFee = await this.feesService.computeFee(
       FeeType.TRANSFER,
@@ -145,6 +198,16 @@ export class TransfersService {
     return transfer;
   }
 
+  async getP2pLimits(userId: string): Promise<{
+    dailyP2pLimit: string;
+    dailyP2pUsed: string;
+    dailyP2pRemaining: string;
+    hourlyCount: number;
+    isFlagged: boolean;
+  }> {
+    return this.p2pLimitService.getLimitsSummary(userId);
+  }
+
   // ── Status helpers (used by processor) ───────────────────────────────────
 
   async markConfirmed(id: string, txHash: string): Promise<Transfer> {
@@ -157,5 +220,26 @@ export class TransfersService {
 
   async markFailed(id: string): Promise<void> {
     await this.transferRepo.update(id, { status: TransferStatus.FAILED });
+  }
+
+  private async validateTransferRequest(
+    fromUsername: string,
+    dto: CreateTransferDto,
+  ): Promise<{ toUser: User; amount: number }> {
+    if (dto.toUsername.toLowerCase() === fromUsername.toLowerCase()) {
+      throw new BadRequestException('Cannot transfer to yourself');
+    }
+
+    const toUser = await this.usersService.findByUsername(dto.toUsername);
+    if (!toUser) {
+      throw new NotFoundException(`User @${dto.toUsername} not found`);
+    }
+
+    const amount = parseFloat(dto.amount);
+    if (isNaN(amount) || amount <= 0) {
+      throw new BadRequestException('Invalid amount');
+    }
+
+    return { toUser, amount };
   }
 }

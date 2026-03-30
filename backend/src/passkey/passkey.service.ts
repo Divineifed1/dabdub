@@ -278,6 +278,7 @@ export class PasskeyService {
         this.generateSessionId(),
         ipAddress,
         deviceInfo,
+        'passkey',
       );
     } catch (error) {
       if (error.message.includes('Counter regression')) {

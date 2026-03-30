@@ -239,6 +239,63 @@ export class ComplianceDashboardService {
     };
   }
 
+  async getHighP2pVelocityUsers(): Promise<
+    Array<{
+      userId: string;
+      email: string;
+      username: string;
+      isActive: boolean;
+      flagCount: number;
+      lastFlagAt: string;
+    }>
+  > {
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const flags = await this.fraudRepo.find({
+      where: {
+        rule: 'velocity.p2p',
+        createdAt: Between(since, new Date()),
+      } as any,
+      order: { createdAt: 'DESC' },
+    });
+
+    if (flags.length === 0) {
+      return [];
+    }
+
+    const stats = new Map<
+      string,
+      { flagCount: number; lastFlagAt: Date }
+    >();
+
+    for (const flag of flags) {
+      const current = stats.get(flag.userId) ?? {
+        flagCount: 0,
+        lastFlagAt: flag.createdAt,
+      };
+      current.flagCount += 1;
+      if (flag.createdAt > current.lastFlagAt) {
+        current.lastFlagAt = flag.createdAt;
+      }
+      stats.set(flag.userId, current);
+    }
+
+    const users = await this.userRepo.find({
+      where: { id: In([...stats.keys()]) },
+    });
+
+    return users.map((user) => {
+      const stat = stats.get(user.id)!;
+      return {
+        userId: user.id,
+        email: user.email,
+        username: user.username,
+        isActive: user.isActive,
+        flagCount: stat.flagCount,
+        lastFlagAt: stat.lastFlagAt.toISOString(),
+      };
+    });
+  }
+
   async getTransactionPatterns(userId: string): Promise<{
     hourlyHeatmap: Array<{ hour: number; count: number }>;
     topRecipients: Array<{ recipient: string; count: number; volume: number }>;

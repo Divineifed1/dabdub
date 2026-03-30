@@ -8,15 +8,27 @@ import { User } from '../users/entities/user.entity';
 import { Admin } from '../admin/entities/admin.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { Session } from './entities/session.entity';
+import { BiometricToken } from './entities/biometric-token.entity';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import { BiometricAuthController } from './biometric-auth.controller';
+import { BiometricAuthService } from './biometric-auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GeoModule } from '../geo/geo.module';
+import { TrustedDevice } from '../security/entities/trusted-device.entity';
+import { CustomThrottlerGuard } from '../common/guards/custom-throttler.guard';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Admin, RefreshToken, Session]),
+    TypeOrmModule.forFeature([
+      User,
+      Admin,
+      RefreshToken,
+      Session,
+      BiometricToken,
+      TrustedDevice,
+    ]),
     PassportModule,
     GeoModule,
     JwtModule.registerAsync({
@@ -27,8 +39,14 @@ import { GeoModule } from '../geo/geo.module';
       }),
     }),
   ],
-  controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JwtAuthGuard],
-  exports: [JwtAuthGuard, AuthService, JwtStrategy],
+  controllers: [AuthController, BiometricAuthController],
+  providers: [
+    AuthService,
+    BiometricAuthService,
+    JwtStrategy,
+    JwtAuthGuard,
+    CustomThrottlerGuard,
+  ],
+  exports: [JwtAuthGuard, AuthService, BiometricAuthService, JwtStrategy],
 })
 export class AuthModule {}

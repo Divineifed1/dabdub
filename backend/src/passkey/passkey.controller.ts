@@ -39,7 +39,7 @@ export class PasskeyController {
     @Req() req: any,
     @Body() dto: RegisterPasskeyOptionsDto,
   ): Promise<RegistrationOptionsResponseDto> {
-    const userId = req.user.sub;
+    const userId = req.user.id;
     const result = await this.passkeyService.generateRegistrationOptions(
       userId,
       dto.nickname,
@@ -57,7 +57,6 @@ export class PasskeyController {
     @Req() req: any,
     @Body() dto: RegisterPasskeyVerifyDto,
   ): Promise<void> {
-    const userId = req.user.sub;
     const sessionId = (dto.response as any).sessionId;
     await this.passkeyService.verifyRegistration(
       sessionId,
@@ -78,7 +77,7 @@ export class PasskeyController {
     @Req() req: any,
   ): Promise<AuthenticationOptionsResponseDto> {
     // If user is authenticated, get their credentials; otherwise, allow any credential
-    const userId = req.user?.sub;
+    const userId = req.user?.id;
     const result = await this.passkeyService.generateAuthenticationOptions(userId);
     return result;
   }
@@ -118,7 +117,7 @@ export class PasskeyController {
   async listCredentials(
     @Req() req: any,
   ): Promise<PasskeyCredentialResponseDto[]> {
-    const userId = req.user.sub;
+    const userId = req.user.id;
     const credentials = await this.passkeyService.listCredentials(userId);
     return credentials.map((cred) =>
       PasskeyCredentialResponseDto.fromEntity(cred),
@@ -136,7 +135,7 @@ export class PasskeyController {
     @Req() req: any,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<void> {
-    const userId = req.user.sub;
+    const userId = req.user.id;
     await this.passkeyService.deleteCredential(userId, id);
   }
 }

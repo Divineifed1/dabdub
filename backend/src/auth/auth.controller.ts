@@ -6,6 +6,7 @@ import {
   Headers,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,12 +15,14 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { JwtService } from '@nestjs/jwt';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { TokenResponseDto } from './dto/token-response.dto';
 import { Public } from './decorators/public.decorator';
+import { CustomThrottlerGuard } from '../common/guards/custom-throttler.guard';
 
 interface RequestWithUser {
   ip: string;
@@ -38,6 +41,8 @@ export class AuthController {
 
   @Public()
   @Post('register')
+  @UseGuards(CustomThrottlerGuard)
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
   @ApiOperation({ summary: 'Register a new user and receive a token pair' })
   @ApiResponse({ status: 201, type: TokenResponseDto })
   @ApiResponse({ status: 400, description: 'Validation error' })
@@ -57,6 +62,8 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(CustomThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @ApiOperation({ summary: 'Login and receive a token pair' })
   @ApiResponse({ status: 200, type: TokenResponseDto })
   @ApiResponse({ status: 400, description: 'Validation error' })
@@ -77,6 +84,8 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(CustomThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @ApiOperation({ summary: 'Rotate a refresh token and receive a new pair' })
   @ApiResponse({ status: 200, type: TokenResponseDto })
   @ApiResponse({ status: 400, description: 'Validation error' })

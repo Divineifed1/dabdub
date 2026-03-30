@@ -8,6 +8,7 @@ import { UsersService } from '../users/users.service';
 import { TierService } from '../tier-config/tier.service';
 import { TierLimitExceededException } from '../common/exceptions/tier-limit-exceeded.exception';
 import { FeesService } from '../fees/fees.service';
+import { P2pLimitService } from './p2p-limit.service';
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
@@ -34,6 +35,24 @@ const mockUsersService = {
 
 const mockTierService = {
   checkTransferLimit: jest.fn(),
+};
+
+const mockP2pLimitService = {
+  assertTransferAllowed: jest.fn().mockResolvedValue({
+    isP2p: true,
+    dailyP2pLimit: '30.00',
+    dailyP2pUsed: '0.00',
+    dailyP2pRemaining: '30.00',
+  }),
+  checkNewRecipientLimit: jest.fn().mockResolvedValue({
+    requiresConfirmation: false,
+  }),
+  checkVelocity: jest.fn().mockResolvedValue({
+    hourlyCount: 0,
+    isFlagged: false,
+    isFrozen: false,
+  }),
+  getLimitsSummary: jest.fn(),
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -79,6 +98,7 @@ describe('TransfersService', () => {
         { provide: getQueueToken(TRANSFER_QUEUE), useValue: mockQueue },
         { provide: UsersService, useValue: mockUsersService },
         { provide: TierService, useValue: mockTierService },
+        { provide: P2pLimitService, useValue: mockP2pLimitService },
       ],
     }).compile();
 
@@ -99,6 +119,7 @@ describe('TransfersService', () => {
       ).rejects.toThrow(NotFoundException);
 
       expect(mockTierService.checkTransferLimit).not.toHaveBeenCalled();
+      expect(mockP2pLimitService.assertTransferAllowed).not.toHaveBeenCalled();
       expect(mockQueue.add).not.toHaveBeenCalled();
     });
 
@@ -152,6 +173,11 @@ describe('TransfersService', () => {
       });
 
       expect(result).toEqual(transfer);
+      expect(mockP2pLimitService.assertTransferAllowed).toHaveBeenCalledWith(
+        'user-uuid-1',
+        'user-uuid-2',
+        10,
+      );
       expect(mockQueue.add).toHaveBeenCalledWith(
         'process-transfer',
         { transferId: transfer.id },

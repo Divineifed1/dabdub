@@ -9,6 +9,7 @@ export enum ComplianceEventType {
   SUSPICIOUS_PATTERN = 'suspicious_pattern',
   STRUCTURING = 'structuring',
   VELOCITY = 'velocity',
+  NEW_RECIPIENT_LARGE_TRANSFER = 'new_recipient_large_transfer',
   OTHER = 'other',
 }
 
